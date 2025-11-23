@@ -1,0 +1,67 @@
+"use client"
+
+import Header from "@/components/layout/header"
+import Footer from "@/components/layout/footer"
+import ProductGrid from "@/components/product/product-grid"
+import ProductFilters from "@/components/product/product-filters"
+import { useState } from "react"
+
+export default function ProductsPage() {
+  const [filters, setFilters] = useState({
+    skinType: [],
+    category: [],
+    priceRange: [0, 5000],
+    concern: [],
+  })
+
+  const [viewType, setViewType] = useState("grid")
+
+  return (
+    <main className="min-h-screen bg-background">
+      <Header />
+
+      {/* Page Header */}
+      <section className="max-w-7xl mx-auto px-4 py-12 border-b border-border">
+        <h1 className="text-4xl font-light text-foreground mb-3">
+          Our <span className="font-semibold">Collections</span>
+        </h1>
+        <p className="text-muted-foreground">Discover products tailored to your skin needs</p>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar Filters */}
+          <aside className="lg:col-span-1">
+            <ProductFilters filters={filters} setFilters={setFilters} />
+          </aside>
+
+          {/* Products Grid */}
+          <div className="lg:col-span-3">
+            <div className="mb-6 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Showing 12 products</p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewType("grid")}
+                  className={`p-2 rounded-lg transition-colors ${viewType === "grid" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-border"}`}
+                >
+                  ⊞
+                </button>
+                <button
+                  onClick={() => setViewType("list")}
+                  className={`p-2 rounded-lg transition-colors ${viewType === "list" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-border"}`}
+                >
+                  ☰
+                </button>
+              </div>
+            </div>
+
+            <ProductGrid viewType={viewType} filters={filters} />
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </main>
+  )
+}
