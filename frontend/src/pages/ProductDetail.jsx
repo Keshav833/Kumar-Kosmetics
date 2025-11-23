@@ -3,11 +3,13 @@ import { useParams } from "react-router-dom"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { Heart, Share2 } from "lucide-react"
+import { useAuthStore } from "@/store/useAuthStore"
 
 export default function ProductDetail() {
   const { id } = useParams()
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("details")
+  const { authUser, openAuthModal } = useAuthStore()
 
   const product = {
     id: id,
@@ -128,7 +130,10 @@ export default function ProductDetail() {
                 <button className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
                   Add to Cart
                 </button>
-                <button className="p-3 border border-border rounded-lg hover:bg-muted transition-colors">
+                <button 
+                  onClick={() => !authUser ? openAuthModal({ type: "wishlist" }) : alert("Added to wishlist!")}
+                  className="p-3 border border-border rounded-lg hover:bg-muted transition-colors"
+                >
                   <Heart className="w-5 h-5 text-primary" />
                 </button>
                 <button className="p-3 border border-border rounded-lg hover:bg-muted transition-colors">
@@ -186,7 +191,16 @@ export default function ProductDetail() {
 
           {activeTab === "reviews" && (
             <div>
-              <p className="text-muted-foreground">Reviews coming soon...</p>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-semibold text-foreground">Customer Reviews</h3>
+                <button 
+                  onClick={() => !authUser ? openAuthModal({ type: "review" }) : alert("Review form coming soon!")}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  Write a Review
+                </button>
+              </div>
+              <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
             </div>
           )}
         </div>

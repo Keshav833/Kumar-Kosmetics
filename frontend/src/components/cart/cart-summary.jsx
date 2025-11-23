@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 
-export default function CartSummary({ items }) {
+export default function CartSummary({ items, onCheckout }) {
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   const tax = Math.round(subtotal * 0.18)
   const shipping = subtotal > 1000 ? 0 : 100
@@ -56,11 +56,12 @@ export default function CartSummary({ items }) {
       </div>
 
       {/* Checkout Button */}
-      <Link to="/checkout" className="block">
-        <button className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-3">
-          Proceed to Checkout
-        </button>
-      </Link>
+      <button 
+        onClick={onCheckout}
+        className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-3"
+      >
+        Proceed to Checkout
+      </button>
 
       {/* Continue Shopping */}
       <Link to="/products" className="block">

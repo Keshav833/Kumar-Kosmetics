@@ -1,10 +1,23 @@
-import { Link } from "react-router-dom"
-import { ShoppingBag, Heart, User, X } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
+import { ShoppingBag, Heart, User, X, LogOut } from "lucide-react"
 import { useState } from "react"
+import { useAuthStore } from "../../store/useAuthStore"
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [wishlistOpen, setWishlistOpen] = useState(false)
+  const { authUser, openAuthModal, logout } = useAuthStore()
+  const navigate = useNavigate()
+
+  const handleWishlistClick = () => {
+    if (!authUser) {
+      openAuthModal({ type: "wishlist" })
+    } else {
+      setWishlistOpen(true)
+    }
+  }
+
+
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border">
@@ -33,7 +46,7 @@ export default function Header() {
 
         {/* Icons */}
         <div className="flex items-center gap-4">
-          <button onClick={() => setWishlistOpen(true)} className="p-2 hover:bg-muted rounded-lg transition-colors">
+          <button onClick={handleWishlistClick} className="p-2 hover:bg-muted rounded-lg transition-colors">
             <Heart className="w-5 h-5 text-foreground" />
           </button>
           <Link to="/cart" className="p-2 hover:bg-muted rounded-lg transition-colors relative">
@@ -42,9 +55,47 @@ export default function Header() {
               0
             </span>
           </Link>
-          <Link to="/login" className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <User className="w-5 h-5 text-foreground" />
-          </Link>
+          {authUser ? (
+            <div className="relative group">
+              <button className="flex items-center gap-2 p-2 hover:bg-muted rounded-lg transition-colors">
+                <User className="w-5 h-5 text-foreground" />
+                <span className="hidden md:block text-sm font-medium text-foreground">{authUser.name}</span>
+              </button>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-border py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="px-4 py-2 border-b border-border">
+                  <p className="text-sm font-medium text-foreground truncate">{authUser.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{authUser.email}</p>
+                </div>
+                
+                <Link to="/profile" className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors">
+                  My Profile
+                </Link>
+                <Link to="/profile" className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors">
+                  My Orders
+                </Link>
+
+                {authUser.role === "admin" && (
+                  <Link to="/admin" className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors">
+                    Admin Dashboard
+                  </Link>
+                )}
+                
+                <button 
+                  onClick={logout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => openAuthModal()} className="p-2 hover:bg-muted rounded-lg transition-colors">
+              <User className="w-5 h-5 text-foreground" />
+            </button>
+          )}
         </div>
       </div>
 

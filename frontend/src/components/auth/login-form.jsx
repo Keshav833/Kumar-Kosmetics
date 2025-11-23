@@ -1,9 +1,10 @@
 import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader } from "lucide-react"
+import { useAuthStore } from "../../store/useAuthStore"
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const { login, loggingIn } = useAuthStore()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,14 +21,7 @@ export default function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    console.log('Login submitted:', formData)
-    setLoading(false)
-    // Redirect to dashboard or home
+    login(formData)
   }
 
   return (
@@ -84,10 +78,17 @@ export default function LoginForm() {
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading}
-        className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+        disabled={loggingIn}
+        className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex justify-center items-center"
       >
-        {loading ? "Signing in..." : "Sign In"}
+        {loggingIn ? (
+          <>
+            <Loader className="mr-2 h-5 w-5 animate-spin" />
+            Signing in...
+          </>
+        ) : (
+          "Sign In"
+        )}
       </button>
 
       {/* Divider */}

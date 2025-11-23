@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader } from "lucide-react"
+import { useAuthStore } from "../../store/useAuthStore"
 
 export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const { signup, signingUp } = useAuthStore()
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -34,38 +34,20 @@ export default function SignupForm() {
       return
     }
 
-    setLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    console.log('Signup submitted:', { ...formData, confirmPassword: undefined })
-    setLoading(false)
+    signup(formData)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* First Name */}
+      {/* Name */}
       <div>
-        <label className="block text-sm font-medium text-foreground mb-2">First Name</label>
+        <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
         <input
           type="text"
-          name="firstName"
-          value={formData.firstName}
+          name="name"
+          value={formData.name}
           onChange={handleChange}
-          placeholder="John"
-          required
-          className="w-full px-4 py-3 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-        />
-      </div>
-
-      {/* Last Name */}
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-2">Last Name</label>
-        <input
-          type="text"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-          placeholder="Doe"
+          placeholder="John Doe"
           required
           className="w-full px-4 py-3 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
         />
@@ -139,10 +121,17 @@ export default function SignupForm() {
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading}
-        className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+        disabled={signingUp}
+        className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex justify-center items-center"
       >
-        {loading ? "Creating account..." : "Create Account"}
+        {signingUp ? (
+          <>
+            <Loader className="mr-2 h-5 w-5 animate-spin" />
+            Creating account...
+          </>
+        ) : (
+          "Create Account"
+        )}
       </button>
 
       {/* Divider */}

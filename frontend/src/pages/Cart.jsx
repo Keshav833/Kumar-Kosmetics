@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuthStore } from "@/store/useAuthStore"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import CartItems from "@/components/cart/cart-items"
@@ -23,6 +24,9 @@ export default function Cart() {
     },
   ])
 
+  const { authUser, openAuthModal } = useAuthStore()
+  const navigate = useNavigate()
+
   const handleUpdateQuantity = (id, quantity) => {
     if (quantity <= 0) {
       handleRemoveItem(id)
@@ -33,6 +37,14 @@ export default function Cart() {
 
   const handleRemoveItem = (id) => {
     setCartItems(prev => prev.filter(item => item.id !== id))
+  }
+
+  const handleCheckout = () => {
+    if (!authUser) {
+      openAuthModal({ type: "checkout" })
+    } else {
+      navigate("/checkout")
+    }
   }
 
   return (
@@ -54,7 +66,7 @@ export default function Cart() {
               <CartItems items={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemoveItem={handleRemoveItem} />
             </div>
             <aside className="lg:col-span-1">
-              <CartSummary items={cartItems} />
+              <CartSummary items={cartItems} onCheckout={handleCheckout} />
             </aside>
           </div>
         </div>
