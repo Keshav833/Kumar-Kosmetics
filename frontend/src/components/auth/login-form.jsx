@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { Eye, EyeOff, Loader } from "lucide-react"
 import { useAuthStore } from "../../store/useAuthStore"
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const { login, loggingIn } = useAuthStore()
+  const { login, loggingIn, googleLogin } = useAuthStore()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -102,19 +103,15 @@ export default function LoginForm() {
       </div>
 
       {/* Social Login */}
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          className="py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
-        >
-          Google
-        </button>
-        <button
-          type="button"
-          className="py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors"
-        >
-          Apple
-        </button>
+      <div className="flex justify-center">
+        <GoogleLogin
+          onSuccess={(credentialResponse) => {
+            googleLogin(credentialResponse.credential);
+          }}
+          onError={() => {
+            console.log("Google auth failed");
+          }}
+        />
       </div>
     </form>
   )

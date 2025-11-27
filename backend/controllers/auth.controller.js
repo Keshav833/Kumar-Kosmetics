@@ -1,6 +1,9 @@
 import { generateTokenAndSetCookie } from "../lib/generateToken.js";
 import User from "../models/Users.model.js";
 import bcrypt from "bcryptjs";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const signup = async (req, res) => {
 	const { email, password, name } = req.body;
@@ -94,5 +97,39 @@ export const getProfile = async (req, res) => {
 		res.json(req.user);
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
+	}
+};
+
+export const googleLogin = async (req, res) => {
+	try {
+		const { token } = req.body;
+		const ticket = await client.verifyIdToken({
+			idToken: token,
+			audience: process.env.GOOGLE_CLIENT_ID,
+		});
+		const { name, email, picture } = ticket.getPayload();
+
+		let user = await User.findOne({ email });
+
+		if (!user) {
+			user = await User.create({
+				name,
+				email,
+				password: await bcrypt.hash(Math.random().toString(36).slice(-8), 10), // Random password for google users
+				role: "customer",
+			});
+		}
+
+		generateTokenAndSetCookie(user._id, res);
+
+		res.json({
+			_id: user._id,
+			name: user.name,
+			email: user.email,
+			role: user.role,
+		});
+	} catch (error) {
+		console.log("Error in googleLogin controller", error.message);
+		res.status(500).json({ message: "Google login failed", error: error.message });
 	}
 };
