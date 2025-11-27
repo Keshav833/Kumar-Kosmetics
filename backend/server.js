@@ -3,6 +3,7 @@ import express from "express"
 import  dotenv  from "dotenv"
 //routes
 import authRoutes from './routes/auth.route.js'
+import profileRoutes from './routes/profile.route.js'
 import { connectDB } from "./lib/db.js"
 
 
@@ -14,18 +15,24 @@ dotenv.config()
 const app = express()
 const port = process.env.PORT || 5000;
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true
 }));
 
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
+
 app.get('/', (req, res) => {
   res.send('Hello World !')
 })
 
 app.use("/api/auth", authRoutes)
+app.use("/api/profile", profileRoutes)
 
 app.listen(port, () => {
   console.log("Server is running on http://localhost:"+ port)

@@ -36,6 +36,32 @@ const userSchema = new mongoose.Schema(
 			enum: ["customer", "admin"],
 			default: "customer",
 		},
+        phone: {
+            type: String,
+            default: "",
+        },
+        avatar: {
+            type: String,
+            default: "",
+        },
+        addresses: [
+            {
+                fullName: String,
+                phone: String,
+                address: String,
+                city: String,
+                state: String,
+                pincode: String,
+                type: { type: String, default: "Home" }, // Home or Work
+            }
+        ],
+        paymentMethods: [
+            {
+                type: { type: String, default: "UPI" },
+                upiId: String,
+                isDefault: { type: Boolean, default: false },
+            }
+        ],
 	},
 	{
 		timestamps: true,

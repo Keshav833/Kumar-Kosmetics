@@ -1,12 +1,33 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuthStore } from "@/store/useAuthStore"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { User, Package, MapPin, CreditCard, LogOut } from "lucide-react"
+import { User, Package, MapPin, CreditCard, LogOut, Plus, Trash2, Edit2, Camera } from "lucide-react"
 
 export default function Profile() {
-  const { authUser, logout } = useAuthStore()
+  const { authUser, logout, updateProfile, addAddress, deleteAddress, addUPI, deleteUPI, getMyOrders } = useAuthStore()
   const [activeTab, setActiveTab] = useState("orders")
+  const [orders, setOrders] = useState([])
+  const [isAddingAddress, setIsAddingAddress] = useState(false)
+  const [isAddingUPI, setIsAddingUPI] = useState(false)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+
+  // Form States
+  const [addressForm, setAddressForm] = useState({
+    fullName: "", phone: "", address: "", city: "", state: "", pincode: "", type: "Home"
+  })
+  const [upiForm, setUpiForm] = useState({ upiId: "" })
+  const [profileForm, setProfileForm] = useState({
+    name: authUser?.name || "",
+    phone: authUser?.phone || "",
+    avatar: authUser?.avatar || ""
+  })
+
+  useEffect(() => {
+    if (activeTab === "orders") {
+      getMyOrders().then(setOrders)
+    }
+  }, [activeTab, getMyOrders])
 
   const tabs = [
     { id: "orders", label: "My Orders", icon: Package },
@@ -14,6 +35,17 @@ export default function Profile() {
     { id: "payment", label: "Payment Methods", icon: CreditCard },
     { id: "account", label: "Account Details", icon: User },
   ]
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileForm({ ...profileForm, avatar: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -25,8 +57,14 @@ export default function Profile() {
           <aside className="w-full md:w-64 flex-shrink-0">
             <div className="bg-white rounded-2xl p-6 border border-border sticky top-24">
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold text-lg">
-                  {authUser?.name?.charAt(0) || "U"}
+                <div className="relative">
+                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-semibold text-lg overflow-hidden">
+                    {authUser?.avatar ? (
+                        <img src={authUser.avatar} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                        authUser?.name?.charAt(0) || "U"
+                    )}
+                    </div>
                 </div>
                 <div>
                   <h2 className="font-semibold text-foreground">{authUser?.name || "User"}</h2>
@@ -67,52 +105,261 @@ export default function Profile() {
                 {tabs.find((t) => t.id === activeTab)?.label}
               </h1>
 
+              {/* MY ORDERS */}
               {activeTab === "orders" && (
-                <div className="text-center py-12">
-                  <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No orders yet</h3>
-                  <p className="text-muted-foreground">Start shopping to see your orders here.</p>
+                <div className="space-y-4">
+                  {orders.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-foreground mb-2">No orders yet</h3>
+                      <p className="text-muted-foreground">Start shopping to see your orders here.</p>
+                    </div>
+                  ) : (
+                    orders.map((order) => (
+                      <div key={order._id} className="border border-border rounded-lg p-4 flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1 space-y-4">
+                            {order.products.map((item, idx) => (
+                                <div key={idx} className="flex gap-4 items-center">
+                                    <div className="w-16 h-16 bg-muted rounded-md overflow-hidden">
+                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium">{item.name}</h4>
+                                        <p className="text-sm text-muted-foreground">Qty: {item.quantity} • ${item.price}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="sm:text-right space-y-2">
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
+                                order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                                'bg-yellow-100 text-yellow-700'
+                            }`}>
+                                {order.status}
+                            </span>
+                            <p className="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</p>
+                            <div className="flex gap-2 justify-end">
+                                <button className="text-sm text-primary hover:underline">View Details</button>
+                                {order.status === 'Pending' && (
+                                    <button className="text-sm text-red-500 hover:underline">Cancel</button>
+                                )}
+                            </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
 
+              {/* SAVED ADDRESSES */}
               {activeTab === "addresses" && (
-                <div className="text-center py-12">
-                  <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No saved addresses</h3>
-                  <p className="text-muted-foreground">Add an address for faster checkout.</p>
+                <div>
+                    {!isAddingAddress ? (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <button 
+                                    onClick={() => setIsAddingAddress(true)}
+                                    className="border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors h-full min-h-[150px]"
+                                >
+                                    <Plus className="w-8 h-8 mb-2" />
+                                    <span>Add New Address</span>
+                                </button>
+                                {authUser?.addresses?.map((addr) => (
+                                    <div key={addr._id} className="border border-border rounded-lg p-6 relative group">
+                                        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button className="p-2 text-muted-foreground hover:text-primary"><Edit2 className="w-4 h-4" /></button>
+                                            <button onClick={() => deleteAddress(addr._id)} className="p-2 text-muted-foreground hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                                        </div>
+                                        <span className="inline-block px-2 py-1 bg-muted rounded text-xs font-medium mb-2">{addr.type}</span>
+                                        <h4 className="font-medium">{addr.fullName}</h4>
+                                        <p className="text-sm text-muted-foreground mt-1">{addr.address}</p>
+                                        <p className="text-sm text-muted-foreground">{addr.city}, {addr.state} - {addr.pincode}</p>
+                                        <p className="text-sm text-muted-foreground mt-2">Phone: {addr.phone}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            addAddress(addressForm);
+                            setIsAddingAddress(false);
+                            setAddressForm({ fullName: "", phone: "", address: "", city: "", state: "", pincode: "", type: "Home" });
+                        }} className="max-w-lg space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <input placeholder="Full Name" className="p-3 border rounded-lg" value={addressForm.fullName} onChange={e => setAddressForm({...addressForm, fullName: e.target.value})} required />
+                                <input placeholder="Phone Number" className="p-3 border rounded-lg" value={addressForm.phone} onChange={e => setAddressForm({...addressForm, phone: e.target.value})} required />
+                            </div>
+                            <textarea placeholder="Address" className="w-full p-3 border rounded-lg" value={addressForm.address} onChange={e => setAddressForm({...addressForm, address: e.target.value})} required />
+                            <div className="grid grid-cols-3 gap-4">
+                                <input placeholder="City" className="p-3 border rounded-lg" value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} required />
+                                <input placeholder="State" className="p-3 border rounded-lg" value={addressForm.state} onChange={e => setAddressForm({...addressForm, state: e.target.value})} required />
+                                <input placeholder="Pincode" className="p-3 border rounded-lg" value={addressForm.pincode} onChange={e => setAddressForm({...addressForm, pincode: e.target.value})} required />
+                            </div>
+                            <div className="flex gap-4">
+                                {['Home', 'Work'].map(type => (
+                                    <label key={type} className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="type" checked={addressForm.type === type} onChange={() => setAddressForm({...addressForm, type})} />
+                                        {type}
+                                    </label>
+                                ))}
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button type="submit" className="bg-primary text-primary-foreground px-6 py-2 rounded-lg">Save Address</button>
+                                <button type="button" onClick={() => setIsAddingAddress(false)} className="px-6 py-2 rounded-lg border hover:bg-muted">Cancel</button>
+                            </div>
+                        </form>
+                    )}
                 </div>
               )}
 
+              {/* PAYMENT METHODS */}
               {activeTab === "payment" && (
-                <div className="text-center py-12">
-                  <CreditCard className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No payment methods</h3>
-                  <p className="text-muted-foreground">Save your payment details for secure checkout.</p>
+                <div className="max-w-xl">
+                    <div className="mb-8">
+                        <h3 className="font-medium mb-4">Default Payment Method</h3>
+                        <div className="p-4 border border-primary bg-primary/5 rounded-lg flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border">💵</div>
+                                <div>
+                                    <p className="font-medium">Cash on Delivery</p>
+                                    <p className="text-xs text-muted-foreground">Default</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className="font-medium mb-4">Saved UPI IDs</h3>
+                        <div className="space-y-3">
+                            {authUser?.paymentMethods?.map((pm) => (
+                                <div key={pm._id} className="p-4 border rounded-lg flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">UPI</div>
+                                        <p className="font-medium">{pm.upiId}</p>
+                                    </div>
+                                    <button onClick={() => deleteUPI(pm._id)} className="text-red-500 hover:bg-red-50 p-2 rounded"><Trash2 className="w-4 h-4" /></button>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {!isAddingUPI ? (
+                            <button onClick={() => setIsAddingUPI(true)} className="mt-4 text-primary flex items-center gap-2 hover:underline">
+                                <Plus className="w-4 h-4" /> Add New UPI ID
+                            </button>
+                        ) : (
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                addUPI(upiForm);
+                                setIsAddingUPI(false);
+                                setUpiForm({ upiId: "" });
+                            }} className="mt-4 flex gap-2">
+                                <input 
+                                    placeholder="example@upi" 
+                                    className="flex-1 p-2 border rounded-lg"
+                                    value={upiForm.upiId}
+                                    onChange={e => setUpiForm({ upiId: e.target.value })}
+                                    required
+                                />
+                                <button type="submit" className="bg-primary text-primary-foreground px-4 py-2 rounded-lg">Add</button>
+                                <button type="button" onClick={() => setIsAddingUPI(false)} className="border px-4 py-2 rounded-lg">Cancel</button>
+                            </form>
+                        )}
+                    </div>
                 </div>
               )}
 
+              {/* ACCOUNT DETAILS */}
               {activeTab === "account" && (
                 <div className="max-w-md">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
-                      <input
-                        type="text"
-                        defaultValue={authUser?.name}
-                        className="w-full px-4 py-3 border border-border rounded-lg text-foreground bg-muted/50"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
-                      <input
-                        type="email"
-                        defaultValue={authUser?.email}
-                        className="w-full px-4 py-3 border border-border rounded-lg text-foreground bg-muted/50"
-                        readOnly
-                      />
-                    </div>
-                  </div>
+                    {!isEditingProfile ? (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-6">
+                                <div className="w-20 h-20 bg-muted rounded-full overflow-hidden">
+                                    {authUser?.avatar ? (
+                                        <img src={authUser.avatar} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-muted-foreground">
+                                            {authUser?.name?.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="font-medium text-lg">{authUser?.name}</h3>
+                                    <p className="text-muted-foreground">{authUser?.email}</p>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-sm text-muted-foreground">Phone Number</label>
+                                    <p className="font-medium">{authUser?.phone || "Not added"}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm text-muted-foreground">Email</label>
+                                    <p className="font-medium">{authUser?.email}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button onClick={() => setIsEditingProfile(true)} className="flex-1 bg-primary text-primary-foreground py-2 rounded-lg">Edit Profile</button>
+                                <button className="flex-1 border border-border py-2 rounded-lg hover:bg-muted">Change Password</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            updateProfile(profileForm);
+                            setIsEditingProfile(false);
+                        }} className="space-y-4">
+                            <div className="flex justify-center mb-6">
+                                <div className="relative">
+                                    <div className="w-24 h-24 bg-muted rounded-full overflow-hidden">
+                                        {profileForm.avatar ? (
+                                            <img src={profileForm.avatar} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-muted-foreground">
+                                                {profileForm.name?.charAt(0)}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <label className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full cursor-pointer hover:opacity-90">
+                                        <Camera className="w-4 h-4" />
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Full Name</label>
+                                <input 
+                                    className="w-full p-3 border rounded-lg"
+                                    value={profileForm.name}
+                                    onChange={e => setProfileForm({...profileForm, name: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Phone Number</label>
+                                <input 
+                                    className="w-full p-3 border rounded-lg"
+                                    value={profileForm.phone}
+                                    onChange={e => setProfileForm({...profileForm, phone: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Email</label>
+                                <input 
+                                    className="w-full p-3 border rounded-lg bg-muted text-muted-foreground"
+                                    value={authUser?.email}
+                                    readOnly
+                                />
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button type="submit" className="flex-1 bg-primary text-primary-foreground py-2 rounded-lg">Save Changes</button>
+                                <button type="button" onClick={() => setIsEditingProfile(false)} className="flex-1 border border-border py-2 rounded-lg hover:bg-muted">Cancel</button>
+                            </div>
+                        </form>
+                    )}
                 </div>
               )}
             </div>

@@ -75,4 +75,82 @@ export const useAuthStore = create((set, get) => ({
 			set({ checkingAuth: false });
 		}
 	},
+
+    updateProfile: async (data) => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.put("/profile/update", data);
+            set({ authUser: res.data });
+            toast.success("Profile updated successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error updating profile");
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    addAddress: async (data) => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.post("/profile/address", data);
+            set({ authUser: res.data });
+            toast.success("Address added successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error adding address");
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    deleteAddress: async (id) => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.delete(`/profile/address/${id}`);
+            set({ authUser: res.data });
+            toast.success("Address deleted successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error deleting address");
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    addUPI: async (data) => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.post("/profile/upi", data);
+            set({ authUser: res.data });
+            toast.success("UPI added successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error adding UPI");
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    deleteUPI: async (id) => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.delete(`/profile/upi/${id}`);
+            set({ authUser: res.data });
+            toast.success("UPI deleted successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error deleting UPI");
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    getMyOrders: async () => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.get("/profile/orders");
+            return res.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error fetching orders");
+            return [];
+        } finally {
+            set({ loading: false });
+        }
+    },
 }));
