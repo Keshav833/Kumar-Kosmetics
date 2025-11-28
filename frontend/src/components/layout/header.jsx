@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom"
-import { ShoppingBag, Heart, User, X, LogOut } from "lucide-react"
+import { ShoppingBag, Heart, User, LogOut } from "lucide-react"
 import { useState } from "react"
 import { useAuthStore } from "../../store/useAuthStore"
 
@@ -8,14 +8,12 @@ export default function Header() {
   const { authUser, openAuthModal, logout } = useAuthStore()
   const navigate = useNavigate()
 
-
-
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border">
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-full" />
+          <img src="/KKLogo.png" alt="Kumar Kosmetics Logo" className="w-10 h-10 object-contain" />
           <span className="text-xl font-semibold text-foreground">Kumar Kosmetics</span>
         </Link>
 

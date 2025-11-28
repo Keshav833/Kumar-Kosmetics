@@ -10,7 +10,7 @@ export default function SkinAnalyzerForm({ onAnalysisComplete }) {
   })
 
   const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"]
-  const concerns = ["Acne", "Pigmentation", "Dullness", "Wrinkles", "Dark Circles", "Dryness", "Sensitivity"]
+  const concerns = ["Acne", "Dullness", "Pigmentation", "Anti-aging", "Redness", "Dark spots", "Uneven skin tone"]
   const allergies = ["Fragrance-free", "Paraben-free", "Sulfate-free", "Silicone-free", "Alcohol-free"]
 
   const toggleConcern = (concern) => {
@@ -107,8 +107,8 @@ export default function SkinAnalyzerForm({ onAnalysisComplete }) {
         {/* Step 3: Allergies/Preferences */}
         {step === 3 && (
           <div className="slide-up">
-            <h2 className="text-2xl font-semibold text-foreground mb-2">Any allergies or preferences?</h2>
-            <p className="text-muted-foreground mb-6">Select ingredients to avoid</p>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">Any preferences?</h2>
+            <p className="text-muted-foreground mb-6">Select attributes you look for</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
               {allergies.map((allergy) => (
                 <button
