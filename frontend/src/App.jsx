@@ -22,6 +22,7 @@ import Admin from './pages/Admin'
 import AddProduct from './pages/admin/AddProduct'
 import AuthModal from './components/auth/AuthModal'
 import Profile from './pages/Profile'
+import Wishlist from "./pages/Wishlist";
 
 function App() {
   const { authUser, checkAuth, checkingAuth } = useAuthStore();
@@ -55,6 +56,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/add-product" element={<AddProduct />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/" />} />
+        <Route path="/wishlist" element={authUser ? <Wishlist /> : <Navigate to="/login" />} />
       </Routes>
       <AuthModal />
       <Toaster />

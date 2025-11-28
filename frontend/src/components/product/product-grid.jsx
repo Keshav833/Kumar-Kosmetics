@@ -2,9 +2,27 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Heart } from "lucide-react"
 import ProductQuickView from "@/components/product/product-quick-view"
+import { useWishlistStore } from "@/store/useWishlistStore"
+import { useAuthStore } from "@/store/useAuthStore"
+import toast from "react-hot-toast"
 
 export default function ProductGrid({ viewType, filters, products = [] }) {
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore()
+  const { authUser, openAuthModal } = useAuthStore()
+
+  const handleWishlistToggle = (e, productId) => {
+    e.preventDefault() // Prevent navigation
+    if (!authUser) {
+      openAuthModal({ type: "wishlist" })
+      return
+    }
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId)
+    } else {
+      addToWishlist(productId)
+    }
+  }
 
   const allProducts = products;
 
@@ -43,8 +61,11 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                     alt={product.name}
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                   />
-                  <button className="absolute top-3 right-3 bg-white rounded-full p-2 hover:bg-muted transition-colors shadow-sm">
-                    <Heart className="w-5 h-5 text-primary" />
+                  <button 
+                    onClick={(e) => handleWishlistToggle(e, product._id || product.id)}
+                    className={`absolute top-3 right-3 rounded-full p-2 transition-colors shadow-sm ${isInWishlist(product._id || product.id) ? "bg-primary/10" : "bg-white hover:bg-muted"}`}
+                  >
+                    <Heart className={`w-5 h-5 ${isInWishlist(product._id || product.id) ? "fill-primary text-primary" : "text-primary"}`} />
                   </button>
                 </div>
 
@@ -115,11 +136,14 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
               </div>
 
               <div className="flex flex-col items-end justify-between">
-                <button className="p-2 hover:bg-muted rounded-lg">
-                  <Heart className="w-5 h-5 text-primary" />
+                <button 
+                  onClick={(e) => handleWishlistToggle(e, product._id || product.id)}
+                  className={`p-2 rounded-lg ${isInWishlist(product._id || product.id) ? "bg-primary/10" : "hover:bg-muted"}`}
+                >
+                  <Heart className={`w-5 h-5 ${isInWishlist(product._id || product.id) ? "fill-primary text-primary" : "text-primary"}`} />
                 </button>
                 <div className="text-right">
-                  <p className="font-semibold text-foreground mb-2">₹{product.price}</p>
+                  <p className="font-semibold text-foreground mb-2">₹{product.price} </p>
                   <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90">
                     Add to Cart
                   </button>

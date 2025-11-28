@@ -5,17 +5,8 @@ import { useAuthStore } from "../../store/useAuthStore"
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [wishlistOpen, setWishlistOpen] = useState(false)
   const { authUser, openAuthModal, logout } = useAuthStore()
   const navigate = useNavigate()
-
-  const handleWishlistClick = () => {
-    if (!authUser) {
-      openAuthModal({ type: "wishlist" })
-    } else {
-      setWishlistOpen(true)
-    }
-  }
 
 
 
@@ -46,9 +37,9 @@ export default function Header() {
 
         {/* Icons */}
         <div className="flex items-center gap-4">
-          <button onClick={handleWishlistClick} className="p-2 hover:bg-muted rounded-lg transition-colors">
+          <Link to="/wishlist" className="p-2 hover:bg-muted rounded-lg transition-colors">
             <Heart className="w-5 h-5 text-foreground" />
-          </button>
+          </Link>
           <Link to="/cart" className="p-2 hover:bg-muted rounded-lg transition-colors relative">
             <ShoppingBag className="w-5 h-5 text-foreground" />
             <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
@@ -99,46 +90,6 @@ export default function Header() {
         </div>
       </div>
 
-      {wishlistOpen && (
-        <div className="fixed inset-0 z-50">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/50" onClick={() => setWishlistOpen(false)} />
-
-          {/* Sidebar */}
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-background shadow-lg flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-2xl font-bold text-foreground">My Wishlist</h2>
-              <button
-                onClick={() => setWishlistOpen(false)}
-                className="p-2 hover:bg-muted rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="flex flex-col items-center justify-center h-full gap-4">
-                <Heart className="w-16 h-16 text-muted-foreground" />
-                <p className="text-center text-muted-foreground">Your wishlist is empty</p>
-                <p className="text-center text-sm text-muted-foreground">Add your favorite products to see them here</p>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-6 border-t border-border">
-              <Link
-                to="/products"
-                onClick={() => setWishlistOpen(false)}
-                className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors text-center block"
-              >
-                Continue Shopping
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   )
 }

@@ -5,6 +5,7 @@ import Footer from "@/components/layout/footer"
 import { Heart, Share2, Loader } from "lucide-react"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useCartStore } from "@/store/useCartStore"
+import { useWishlistStore } from "@/store/useWishlistStore"
 import axiosInstance from "@/lib/axios"
 import toast from "react-hot-toast"
 
@@ -14,6 +15,7 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState("details")
   const { authUser, openAuthModal } = useAuthStore()
   const { addToCart } = useCartStore()
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore()
   
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -43,6 +45,18 @@ export default function ProductDetail() {
       return
     }
     addToCart(product._id, quantity, selectedVariant)
+  }
+
+  const handleWishlistToggle = () => {
+    if (!authUser) {
+      openAuthModal({ type: "wishlist" })
+      return
+    }
+    if (isInWishlist(product._id)) {
+      removeFromWishlist(product._id)
+    } else {
+      addToWishlist(product._id)
+    }
   }
 
   if (loading) {
@@ -189,10 +203,10 @@ export default function ProductDetail() {
                   Add to Cart
                 </button>
                 <button 
-                  onClick={() => !authUser ? openAuthModal({ type: "wishlist" }) : toast.success("Added to wishlist!")}
-                  className="p-3 border border-border rounded-lg hover:bg-muted transition-colors"
+                  onClick={handleWishlistToggle}
+                  className={`p-3 border border-border rounded-lg hover:bg-muted transition-colors ${isInWishlist(product._id) ? "bg-primary/10 border-primary" : ""}`}
                 >
-                  <Heart className="w-5 h-5 text-primary" />
+                  <Heart className={`w-5 h-5 ${isInWishlist(product._id) ? "fill-primary text-primary" : "text-primary"}`} />
                 </button>
                 <button className="p-3 border border-border rounded-lg hover:bg-muted transition-colors">
                   <Share2 className="w-5 h-5 text-foreground" />
