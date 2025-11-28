@@ -1,4 +1,6 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axiosInstance from "../lib/axios"
+import toast from "react-hot-toast"
 import AdminHeader from "@/components/admin/admin-header"
 import AdminSidebar from "@/components/admin/admin-sidebar"
 import DashboardOverview from "@/components/admin/dashboard-overview"
@@ -10,6 +12,20 @@ import CustomersSection from "@/components/admin/customers-section"
 export default function Admin() {
   const [currentSection, setCurrentSection] = useState("overview")
   const [products, setProducts] = useState([])
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axiosInstance.get("/products");
+        setProducts(res.data.products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Failed to fetch products");
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const [orders, setOrders] = useState([
     { id: "#KK-001", customer: "Priya Sharma", date: "2024-11-15", total: 5398, status: "Delivered" },
     { id: "#KK-002", customer: "Aisha Patel", date: "2024-11-14", total: 3299, status: "Processing" },

@@ -13,10 +13,13 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import ForgotPassword from './pages/ForgotPassword'
+import ForgotPassword from './pages/auth/ForgotPassword'
+import VerifyOtp from './pages/auth/VerifyOtp'
+import ResetPassword from './pages/auth/ResetPassword'
 import Contact from './pages/Contact'
 import SkinAnalyzer from './pages/SkinAnalyzer'
 import Admin from './pages/Admin'
+import AddProduct from './pages/admin/AddProduct'
 import AuthModal from './components/auth/AuthModal'
 import Profile from './pages/Profile'
 
@@ -45,9 +48,12 @@ function App() {
         <Route path="/login" element={!authUser ? <Login /> : <Navigate to="/" />} />
         <Route path="/signup" element={!authUser ? <Signup /> : <Navigate to="/" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/skin-analyzer" element={<SkinAnalyzer />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/add-product" element={<AddProduct />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/" />} />
       </Routes>
       <AuthModal />

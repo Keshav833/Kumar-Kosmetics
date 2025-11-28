@@ -2,6 +2,8 @@ import { generateTokenAndSetCookie } from "../lib/generateToken.js";
 import User from "../models/Users.model.js";
 import bcrypt from "bcryptjs";
 import { OAuth2Client } from "google-auth-library";
+import OTP from "../models/otp.model.js";
+import { sendEmail } from "../utils/emailSender.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -132,4 +134,91 @@ export const googleLogin = async (req, res) => {
 		console.log("Error in googleLogin controller", error.message);
 		res.status(500).json({ message: "Google login failed", error: error.message });
 	}
+};
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash OTP
+        const hashedOtp = await bcrypt.hash(otp, 10);
+
+        // Save to DB (delete old OTPs for this email first)
+        await OTP.deleteMany({ email });
+        await OTP.create({ email, otp: hashedOtp });
+
+        // Send Email
+        await sendEmail(email, "Password Reset OTP", `Your OTP for password reset is: ${otp}. It expires in 5 minutes.`);
+
+        res.json({ message: "OTP sent to your email" });
+    } catch (error) {
+        console.log("Error in forgotPassword", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+export const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        
+        const otpRecord = await OTP.findOne({ email });
+
+        if (!otpRecord) {
+            return res.status(400).json({ message: "OTP expired or invalid" });
+        }
+
+        const isMatch = await bcrypt.compare(otp, otpRecord.otp);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        res.json({ message: "OTP verified successfully" });
+    } catch (error) {
+        console.log("Error in verifyOtp", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        // Verify OTP again for security
+        const otpRecord = await OTP.findOne({ email });
+        if (!otpRecord) {
+            return res.status(400).json({ message: "OTP expired or invalid" });
+        }
+
+        const isMatch = await bcrypt.compare(otp, otpRecord.otp);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        // Update User Password
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.password = newPassword; // Will be hashed by pre-save hook
+        user.lastPasswordChange = Date.now();
+        await user.save();
+
+        // Delete OTP
+        await OTP.deleteMany({ email });
+
+        res.json({ message: "Password reset successfully" });
+    } catch (error) {
+        console.log("Error in resetPassword", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };

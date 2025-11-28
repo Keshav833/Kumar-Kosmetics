@@ -7,13 +7,15 @@ import {
 	addUPI,
 	deleteUPI,
 	getOrders,
-    getProfile
+    getProfile,
+    changePassword
 } from "../controllers/profile.controller.js";
 
 const router = express.Router();
 
 router.get("/", protectRoute, getProfile);
 router.put("/update", protectRoute, updateProfile);
+router.put("/password", protectRoute, changePassword);
 router.post("/address", protectRoute, addAddress);
 router.delete("/address/:id", protectRoute, deleteAddress);
 router.post("/upi", protectRoute, addUPI);

@@ -1,42 +1,30 @@
-import { useState } from "react"
+import { useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useCartStore } from "@/store/useCartStore"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import CartItems from "@/components/cart/cart-items"
 import CartSummary from "@/components/cart/cart-summary"
+import { Loader } from "lucide-react"
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Hydrating Essence Serum",
-      price: 2499,
-      image: "/hydrating-essence-serum-cosmetics.jpg",
-      quantity: 2,
-    },
-    {
-      id: 2,
-      name: "Gentle Cleansing Balm",
-      price: 1899,
-      image: "/cleansing-balm-skincare-product.jpg",
-      quantity: 1,
-    },
-  ])
-
   const { authUser, openAuthModal } = useAuthStore()
+  const { cart, getCart, updateQuantity, removeFromCart, loading } = useCartStore()
   const navigate = useNavigate()
 
-  const handleUpdateQuantity = (id, quantity) => {
-    if (quantity <= 0) {
-      handleRemoveItem(id)
-      return
+  useEffect(() => {
+    if (authUser) {
+        getCart()
     }
-    setCartItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)))
+  }, [authUser, getCart])
+
+  const handleUpdateQuantity = (id, quantity) => {
+    updateQuantity(id, quantity)
   }
 
   const handleRemoveItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id))
+    removeFromCart(id)
   }
 
   const handleCheckout = () => {
@@ -46,6 +34,16 @@ export default function Cart() {
       navigate("/checkout")
     }
   }
+
+  if (loading && !cart) {
+      return (
+          <div className="min-h-screen bg-background flex items-center justify-center">
+              <Loader className="w-10 h-10 animate-spin text-primary" />
+          </div>
+      )
+  }
+
+  const cartItems = cart?.items || []
 
   return (
     <main className="min-h-screen bg-background">

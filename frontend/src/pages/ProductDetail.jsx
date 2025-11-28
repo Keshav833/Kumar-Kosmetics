@@ -1,33 +1,64 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Heart, Share2 } from "lucide-react"
+import { Heart, Share2, Loader } from "lucide-react"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useCartStore } from "@/store/useCartStore"
+import axiosInstance from "@/lib/axios"
+import toast from "react-hot-toast"
 
 export default function ProductDetail() {
   const { id } = useParams()
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("details")
   const { authUser, openAuthModal } = useAuthStore()
+  const { addToCart } = useCartStore()
+  
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [selectedVariant, setSelectedVariant] = useState(null)
 
-  const product = {
-    id: id,
-    name: "Hydrating Essence Serum",
-    price: 2499,
-    rating: 4.8,
-    reviews: 128,
-    images: ["/hydrating-essence-serum-cosmetics.jpg", "/placeholder.svg?key=psxh7", "/placeholder.svg?key=w2llu"],
-    category: "Serums",
-    skinType: ["Dry", "Sensitive"],
-    concerns: ["Dryness", "Dullness"],
-    ingredients: ["Hyaluronic Acid", "Vitamin E", "Aloe Vera", "Squalane", "Glycerin"],
-    tags: ["Paraben-free", "Cruelty-free", "Vegan", "Fragrance-free"],
-    description:
-      "A lightweight yet powerful hydrating serum that penetrates deep into the skin to provide intense moisture and nourishment. Formulated with hyaluronic acid and vitamin E, this serum helps to lock in moisture and improve skin texture.",
-    howToUse:
-      "Apply 2-3 drops to clean, damp skin and gently pat in. Follow with your favorite moisturizer. Use morning and night for best results.",
-    relatedProducts: [1, 2, 3, 4],
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await axiosInstance.get(`/products/${id}`)
+        setProduct(res.data)
+        if (res.data.variants && res.data.variants.length > 0) {
+            setSelectedVariant(res.data.variants[0].name)
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error)
+        toast.error("Failed to load product details")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProduct()
+  }, [id])
+
+  const handleAddToCart = () => {
+    if (!authUser) {
+      openAuthModal({ type: "cart" })
+      return
+    }
+    addToCart(product._id, quantity, selectedVariant)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-xl text-muted-foreground">Product not found</p>
+      </div>
+    )
   }
 
   return (
@@ -41,13 +72,13 @@ export default function ProductDetail() {
           <div>
             <div className="bg-muted rounded-2xl overflow-hidden mb-4 h-96">
               <img
-                src={product.images[0] || "/placeholder.svg"}
+                src={product.images?.[0] || "/placeholder.svg"}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
-              {product.images.map((img, idx) => (
+              {product.images?.map((img, idx) => (
                 <div key={idx} className="bg-muted rounded-lg overflow-hidden cursor-pointer hover:ring-2 ring-primary">
                   <img
                     src={img || "/placeholder.svg"}
@@ -68,8 +99,8 @@ export default function ProductDetail() {
 
             {/* Rating */}
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-xl text-primary">★ {product.rating}</span>
-              <span className="text-sm text-muted-foreground">({product.reviews} reviews)</span>
+              <span className="text-xl text-primary">★ {product.rating || "New"}</span>
+              <span className="text-sm text-muted-foreground">({product.reviews || 0} reviews)</span>
             </div>
 
             {/* Price */}
@@ -77,7 +108,7 @@ export default function ProductDetail() {
 
             {/* Tags */}
             <div className="flex gap-2 mb-6 flex-wrap">
-              {product.tags.map((tag) => (
+              {(product.allergyLabels || []).map((tag) => (
                 <span key={tag} className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">
                   {tag}
                 </span>
@@ -87,12 +118,30 @@ export default function ProductDetail() {
             {/* Description */}
             <p className="text-muted-foreground leading-relaxed mb-8">{product.description}</p>
 
+            {/* Variants */}
+            {product.variants && product.variants.length > 0 && (
+                <div className="mb-6">
+                    <p className="font-semibold text-foreground mb-2">Variants</p>
+                    <div className="flex gap-2">
+                        {product.variants.map((variant) => (
+                            <button
+                                key={variant._id || variant.name}
+                                onClick={() => setSelectedVariant(variant.name)}
+                                className={`px-4 py-2 rounded-lg border ${selectedVariant === variant.name ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-muted'}`}
+                            >
+                                {variant.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Skin Type & Concerns */}
             <div className="mb-8">
               <div className="mb-4">
                 <p className="font-semibold text-foreground mb-2">Best for</p>
                 <div className="flex gap-2 flex-wrap">
-                  {product.skinType.map((type) => (
+                  {(product.skinType || []).map((type) => (
                     <span key={type} className="text-sm bg-secondary/20 text-foreground px-3 py-1 rounded-lg">
                       {type} Skin
                     </span>
@@ -102,7 +151,7 @@ export default function ProductDetail() {
               <div>
                 <p className="font-semibold text-foreground mb-2">Addresses</p>
                 <div className="flex gap-2 flex-wrap">
-                  {product.concerns.map((concern) => (
+                  {(product.skinConcerns || []).map((concern) => (
                     <span key={concern} className="text-sm bg-accent/20 text-foreground px-3 py-1 rounded-lg">
                       {concern}
                     </span>
@@ -127,11 +176,14 @@ export default function ProductDetail() {
               </div>
 
               <div className="flex gap-3">
-                <button className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                <button 
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                >
                   Add to Cart
                 </button>
                 <button 
-                  onClick={() => !authUser ? openAuthModal({ type: "wishlist" }) : alert("Added to wishlist!")}
+                  onClick={() => !authUser ? openAuthModal({ type: "wishlist" }) : toast.success("Added to wishlist!")}
                   className="p-3 border border-border rounded-lg hover:bg-muted transition-colors"
                 >
                   <Heart className="w-5 h-5 text-primary" />
@@ -171,7 +223,7 @@ export default function ProductDetail() {
             <div className="space-y-6">
               <div>
                 <h3 className="font-semibold text-foreground mb-2">How to Use</h3>
-                <p className="text-muted-foreground leading-relaxed">{product.howToUse}</p>
+                <p className="text-muted-foreground leading-relaxed">{product.howToUse || "Apply as needed."}</p>
               </div>
             </div>
           )}
@@ -180,7 +232,7 @@ export default function ProductDetail() {
             <div>
               <h3 className="font-semibold text-foreground mb-4">Key Ingredients</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {product.ingredients.map((ing) => (
+                {(product.ingredients || []).map((ing) => (
                   <div key={ing} className="bg-muted rounded-lg p-4">
                     <p className="font-medium text-foreground text-sm">{ing}</p>
                   </div>
@@ -194,7 +246,7 @@ export default function ProductDetail() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-semibold text-foreground">Customer Reviews</h3>
                 <button 
-                  onClick={() => !authUser ? openAuthModal({ type: "review" }) : alert("Review form coming soon!")}
+                  onClick={() => !authUser ? openAuthModal({ type: "review" }) : toast.success("Review form coming soon!")}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
                 >
                   Write a Review

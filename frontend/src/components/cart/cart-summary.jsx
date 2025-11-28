@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
 
 export default function CartSummary({ items, onCheckout }) {
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const subtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0)
   const tax = Math.round(subtotal * 0.18)
   const shipping = subtotal > 1000 ? 0 : 100
   const total = subtotal + tax + shipping

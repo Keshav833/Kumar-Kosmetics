@@ -3,6 +3,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import { User, Package, MapPin, CreditCard, LogOut, Plus, Trash2, Edit2, Camera } from "lucide-react"
+import ChangePassword from "@/components/profile/ChangePassword"
 
 export default function Profile() {
   const { authUser, logout, updateProfile, addAddress, deleteAddress, addUPI, deleteUPI, getMyOrders } = useAuthStore()
@@ -11,6 +12,7 @@ export default function Profile() {
   const [isAddingAddress, setIsAddingAddress] = useState(false)
   const [isAddingUPI, setIsAddingUPI] = useState(false)
   const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   // Form States
   const [addressForm, setAddressForm] = useState({
@@ -302,7 +304,7 @@ export default function Profile() {
                             </div>
                             <div className="flex gap-4 pt-4">
                                 <button onClick={() => setIsEditingProfile(true)} className="flex-1 bg-primary text-primary-foreground py-2 rounded-lg">Edit Profile</button>
-                                <button className="flex-1 border border-border py-2 rounded-lg hover:bg-muted">Change Password</button>
+                                <button onClick={() => setIsChangingPassword(true)} className="flex-1 border border-border py-2 rounded-lg hover:bg-muted">Change Password</button>
                             </div>
                         </div>
                     ) : (
@@ -368,6 +370,7 @@ export default function Profile() {
       </section>
 
       <Footer />
+      {isChangingPassword && <ChangePassword onClose={() => setIsChangingPassword(false)} />}
     </main>
   )
 }

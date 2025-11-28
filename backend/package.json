@@ -24,6 +24,7 @@
     "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3",
+    "nodemailer": "^7.0.11",
     "stripe": "^19.3.0"
   },
   "devDependencies": {

@@ -89,6 +89,24 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
+    changePassword: async (data) => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.put("/profile/password", data);
+            toast.success(res.data.message);
+            if (data.logoutOthers) {
+                set({ authUser: null });
+                window.location.href = "/login";
+            }
+            return true;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error changing password");
+            return false;
+        } finally {
+            set({ loading: false });
+        }
+    },
+
     addAddress: async (data) => {
         set({ loading: true });
         try {

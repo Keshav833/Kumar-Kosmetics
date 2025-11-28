@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema(
                 isDefault: { type: Boolean, default: false },
             }
         ],
+        lastPasswordChange: {
+            type: Date,
+            default: Date.now,
+        },
 	},
 	{
 		timestamps: true,

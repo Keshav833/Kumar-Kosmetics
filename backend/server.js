@@ -4,6 +4,8 @@ import  dotenv  from "dotenv"
 //routes
 import authRoutes from './routes/auth.route.js'
 import profileRoutes from './routes/profile.route.js'
+import productRoutes from './routes/product.route.js'
+import cartRoutes from './routes/cart.route.js'
 import { connectDB } from "./lib/db.js"
 
 
@@ -33,6 +35,8 @@ app.get('/', (req, res) => {
 
 app.use("/api/auth", authRoutes)
 app.use("/api/profile", profileRoutes)
+app.use("/api/products", productRoutes)
+app.use("/api/cart", cartRoutes)
 
 app.listen(port, () => {
   console.log("Server is running on http://localhost:"+ port)

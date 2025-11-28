@@ -1,4 +1,6 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axiosInstance from "../lib/axios"
+import toast from "react-hot-toast"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import ProductGrid from "@/components/product/product-grid"
@@ -13,6 +15,20 @@ export default function Products() {
   })
 
   const [viewType, setViewType] = useState("grid")
+  const [products, setProducts] = useState([])
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axiosInstance.get("/products");
+        setProducts(res.data.products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Failed to fetch products");
+      }
+    };
+    fetchProducts();
+  }, []);
 
   return (
     <main className="min-h-screen bg-background">
@@ -54,7 +70,7 @@ export default function Products() {
               </div>
             </div>
 
-            <ProductGrid viewType={viewType} filters={filters} />
+            <ProductGrid viewType={viewType} filters={filters} products={products} />
           </div>
         </div>
       </div>

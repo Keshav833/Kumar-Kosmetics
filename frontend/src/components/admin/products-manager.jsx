@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import { X, Upload, Edit2, Trash2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export default function ProductsManager({ products, setProducts }) {
+  const navigate = useNavigate()
   const [showModal, setShowModal] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({
@@ -87,7 +89,7 @@ export default function ProductsManager({ products, setProducts }) {
           <span className="text-lg text-muted-foreground ml-2">({products.length})</span>
         </h2>
         <button
-          onClick={() => handleOpenModal()}
+          onClick={() => navigate("/admin/add-product")}
           className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
         >
           Add Product
@@ -98,7 +100,7 @@ export default function ProductsManager({ products, setProducts }) {
         <div className="bg-white rounded-2xl border border-border p-12 text-center">
           <p className="text-muted-foreground mb-4">No products added yet</p>
           <button
-            onClick={() => handleOpenModal()}
+            onClick={() => navigate("/admin/add-product")}
             className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:opacity-90"
           >
             Add Your First Product
