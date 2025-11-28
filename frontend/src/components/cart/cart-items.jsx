@@ -7,11 +7,11 @@ export default function CartItems({ items, onUpdateQuantity, onRemoveItem }) {
         <div key={item._id} className="bg-white rounded-2xl p-6 border border-border hover:shadow-lg transition-shadow">
           <div className="flex gap-6">
             {/* Image */}
-            <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+            <div className="w-24 h-24 bg-white rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-100">
               <img
                 src={item.product?.images?.[0] || "/placeholder.svg"}
                 alt={item.product?.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
 

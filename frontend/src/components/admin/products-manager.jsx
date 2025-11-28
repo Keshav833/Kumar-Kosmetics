@@ -123,11 +123,13 @@ export default function ProductsManager({ products, setProducts }) {
               {products.map((product) => (
                 <tr key={product.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                   <td className="px-6 py-4 text-sm">
-                    <img
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                      className="w-10 h-10 rounded-lg object-cover"
-                    />
+                    <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center border border-gray-100">
+                      <img
+                        src={product.image || "/placeholder.svg"}
+                        alt={product.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-foreground">{product.name}</td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{product.sku}</td>
@@ -188,11 +190,13 @@ export default function ProductsManager({ products, setProducts }) {
                   <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
                     {formData.image ? (
                       <div className="flex flex-col items-center">
-                        <img
-                          src={formData.image || "/placeholder.svg"}
-                          alt="preview"
-                          className="w-32 h-32 rounded-lg object-cover mb-4"
-                        />
+                        <div className="w-32 h-32 bg-white rounded-lg overflow-hidden flex items-center justify-center mb-4 border border-gray-100">
+                          <img
+                            src={formData.image || "/placeholder.svg"}
+                            alt="preview"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
                         <label className="cursor-pointer">
                           <span className="text-primary hover:underline font-medium">Change Image</span>
                           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />

@@ -70,20 +70,26 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Gallery */}
           <div>
-            <div className="bg-muted rounded-2xl overflow-hidden mb-4 h-96">
-              <img
-                src={product.images?.[0] || "/placeholder.svg"}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-full max-w-md mx-auto mb-6">
+              <div className="w-full h-80 bg-white rounded-xl overflow-hidden flex items-center justify-center border border-gray-100">
+                <img
+                  src={
+                    selectedVariant 
+                      ? product.variants.find(v => v.name === selectedVariant)?.image || product.images?.[0] || "/placeholder.svg"
+                      : product.images?.[0] || "/placeholder.svg"
+                  }
+                  alt={product.name}
+                  className="w-full h-full object-contain"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {product.images?.map((img, idx) => (
-                <div key={idx} className="bg-muted rounded-lg overflow-hidden cursor-pointer hover:ring-2 ring-primary">
+                <div key={idx} className="bg-white rounded-lg overflow-hidden cursor-pointer hover:ring-2 ring-primary h-24 flex items-center justify-center border border-gray-100">
                   <img
                     src={img || "/placeholder.svg"}
                     alt={`${product.name} ${idx + 1}`}
-                    className="w-full h-24 object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               ))}

@@ -37,13 +37,13 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
             <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
               <div className="bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
                 {/* Image */}
-                <div className="relative h-48 bg-muted overflow-hidden">
+                <div className="relative h-48 bg-white overflow-hidden flex items-center justify-center">
                   <img
                     src={product.images?.[0] || product.image || "/placeholder.svg"}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
                   />
-                  <button className="absolute top-3 right-3 bg-white rounded-full p-2 hover:bg-muted transition-colors">
+                  <button className="absolute top-3 right-3 bg-white rounded-full p-2 hover:bg-muted transition-colors shadow-sm">
                     <Heart className="w-5 h-5 text-primary" />
                   </button>
                 </div>
@@ -93,11 +93,11 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
         {filteredProducts.map((product) => (
           <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
             <div className="bg-white rounded-2xl p-4 flex gap-4 hover:shadow-lg transition-shadow cursor-pointer">
-              <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+              <div className="w-24 h-24 bg-white rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-100">
                 <img
                   src={product.images?.[0] || product.image || "/placeholder.svg"}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
 
