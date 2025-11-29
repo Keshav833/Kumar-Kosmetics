@@ -76,7 +76,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
 
                   {/* Rating */}
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-primary">★ {product.rating || "New"}</span>
+                    <span className="text-xs text-primary">★ {product.rating ? product.rating.toFixed(1) : "New"}</span>
                     <span className="text-xs text-muted-foreground">({product.reviews || 0})</span>
                   </div>
 
@@ -130,7 +130,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-primary">
-                    ★ {product.rating || "New"} ({product.reviews || 0})
+                    ★ {product.rating ? product.rating.toFixed(1) : "New"} ({product.reviews || 0})
                   </span>
                 </div>
               </div>

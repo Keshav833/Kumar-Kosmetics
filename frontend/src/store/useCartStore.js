@@ -59,4 +59,13 @@ export const useCartStore = create((set, get) => ({
       set({ loading: false });
     }
   },
+
+  clearCart: async () => {
+    set({ cart: [] });
+    try {
+        await axiosInstance.delete("/cart");
+    } catch (error) {
+        console.error("Error clearing cart:", error);
+    }
+  },
 }));

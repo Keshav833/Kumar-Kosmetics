@@ -99,7 +99,22 @@ export const updateQuantity = async (req, res) => {
       res.status(404).json({ message: "Item not found in cart" });
     }
   } catch (error) {
-    console.error("Error in updateQuantity controller", error.message);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
+};
+
+export const clearCart = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const cart = await Cart.findOne({ user: userId });
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found" });
+        }
+        cart.items = [];
+        await cart.save();
+        res.json(cart);
+    } catch (error) {
+        console.error("Error in clearCart controller", error.message);
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
 };

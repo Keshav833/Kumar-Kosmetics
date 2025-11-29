@@ -30,6 +30,27 @@ export default function Products() {
     fetchProducts();
   }, []);
 
+  // Filter products based on active filters
+  const filteredProducts = products.filter((product) => {
+    const productSkinTypes = product.skinType || [];
+    const productConcerns = product.skinConcerns || product.concerns || [];
+    const productPrice = product.price || 0;
+
+    if (filters.skinType.length > 0 && !filters.skinType.some((type) => productSkinTypes.includes(type))) {
+      return false
+    }
+    if (filters.category.length > 0 && !filters.category.includes(product.category)) {
+      return false
+    }
+    if (productPrice < filters.priceRange[0] || productPrice > filters.priceRange[1]) {
+      return false
+    }
+    if (filters.concern.length > 0 && !filters.concern.some((concern) => productConcerns.includes(concern))) {
+      return false
+    }
+    return true
+  })
+
   return (
     <main className="min-h-screen bg-background">
       <Header />
@@ -53,7 +74,7 @@ export default function Products() {
           {/* Products Grid */}
           <div className="lg:col-span-3">
             <div className="mb-6 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Showing 12 products</p>
+              <p className="text-sm text-muted-foreground">Showing {filteredProducts.length} products</p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewType("grid")}
@@ -70,7 +91,16 @@ export default function Products() {
               </div>
             </div>
 
-            <ProductGrid viewType={viewType} filters={filters} products={products} />
+            <ProductGrid 
+              viewType={viewType} 
+              filters={{
+                skinType: [],
+                category: [],
+                priceRange: [0, 1000000],
+                concern: [],
+              }} 
+              products={filteredProducts} 
+            />
           </div>
         </div>
       </div>

@@ -111,41 +111,80 @@ export default function Profile() {
               {activeTab === "orders" && (
                 <div className="space-y-4">
                   {orders.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <div className="text-center py-12 bg-muted/30 rounded-xl border border-dashed border-border">
+                      <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                       <h3 className="text-lg font-medium text-foreground mb-2">No orders yet</h3>
                       <p className="text-muted-foreground">Start shopping to see your orders here.</p>
                     </div>
                   ) : (
                     orders.map((order) => (
-                      <div key={order._id} className="border border-border rounded-lg p-4 flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1 space-y-4">
-                            {order.products.map((item, idx) => (
-                                <div key={idx} className="flex gap-4 items-center">
-                                    <div className="w-16 h-16 bg-muted rounded-md overflow-hidden">
-                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-medium">{item.name}</h4>
-                                        <p className="text-sm text-muted-foreground">Qty: {item.quantity} • ${item.price}</p>
-                                    </div>
+                      <div key={order._id} className="bg-white border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-200">
+                        {/* Order Header */}
+                        <div className="bg-muted/30 px-6 py-4 border-b border-border flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-white p-2 rounded-lg border border-border">
+                                    <Package className="w-5 h-5 text-primary" />
                                 </div>
-                            ))}
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Order ID</p>
+                                    <p className="font-mono font-medium text-foreground">#{order._id.slice(-6)}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Date Placed</p>
+                                    <p className="font-medium text-foreground">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Total Amount</p>
+                                    <p className="font-semibold text-primary">₹{order.totalAmount}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="sm:text-right space-y-2">
-                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
-                                order.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                                'bg-yellow-100 text-yellow-700'
-                            }`}>
-                                {order.status}
-                            </span>
-                            <p className="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</p>
-                            <div className="flex gap-2 justify-end">
-                                <button className="text-sm text-primary hover:underline">View Details</button>
-                                {order.status === 'Pending' && (
-                                    <button className="text-sm text-red-500 hover:underline">Cancel</button>
-                                )}
+
+                        {/* Order Items */}
+                        <div className="p-6">
+                            <div className="space-y-6">
+                                {order.items.map((item, idx) => (
+                                    <div key={idx} className="flex gap-4 items-start">
+                                        <div className="w-20 h-20 bg-muted/30 rounded-lg border border-border overflow-hidden flex-shrink-0">
+                                            <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-full h-full object-contain p-2" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-medium text-foreground truncate">{item.name}</h4>
+                                            <p className="text-sm text-muted-foreground mt-1">Variant: {item.variant || "N/A"}</p>
+                                            <div className="flex items-center gap-4 mt-2">
+                                                <span className="text-sm bg-muted px-2 py-1 rounded text-muted-foreground">Qty: {item.quantity}</span>
+                                                <span className="text-sm font-medium">₹{item.price}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Order Footer */}
+                            <div className="mt-6 pt-6 border-t border-border flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-muted-foreground">Status:</span>
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                                        order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                                        order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                        {order.status}
+                                    </span>
+                                </div>
+                                <div className="flex gap-3">
+                                    {order.status === 'Pending' && (
+                                        <button className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                            Cancel Order
+                                        </button>
+                                    )}
+                                    <button className="px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors border border-transparent hover:border-primary/20">
+                                        View Details
+                                    </button>
+                                </div>
                             </div>
                         </div>
                       </div>

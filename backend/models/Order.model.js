@@ -7,15 +7,14 @@ const orderSchema = new mongoose.Schema(
 			ref: "User",
 			required: true,
 		},
-		products: [
+		items: [
 			{
 				product: {
 					type: mongoose.Schema.Types.ObjectId,
 					ref: "Product",
 					required: true,
 				},
-                name: String,
-                image: String,
+                name: { type: String, required: true },
 				quantity: {
 					type: Number,
 					required: true,
@@ -26,6 +25,8 @@ const orderSchema = new mongoose.Schema(
 					required: true,
 					min: 0,
 				},
+                image: { type: String, required: true },
+                variant: { type: String }, // Optional
 			},
 		],
 		totalAmount: {
@@ -33,19 +34,41 @@ const orderSchema = new mongoose.Schema(
 			required: true,
 			min: 0,
 		},
+        address: {
+            fullName: { type: String, required: true },
+            phone: { type: String, required: true },
+            address: { type: String, required: true },
+            city: { type: String, required: true },
+            state: { type: String, required: true },
+            pincode: { type: String, required: true },
+        },
 		status: {
 			type: String,
-			enum: ["Pending", "Shipped", "Delivered", "Cancelled"],
+			enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
 			default: "Pending",
 		},
         paymentMethod: {
             type: String,
-            default: "COD",
+            enum: ["COD", "Online"],
+            required: true,
         },
-		stripeSessionId: {
-			type: String,
-			unique: true,
-		},
+        paymentStatus: {
+            type: String,
+            enum: ["Pending", "Paid", "Failed"],
+            default: "Pending",
+        },
+        razorpayOrderId: {
+            type: String,
+        },
+        razorpayPaymentId: {
+            type: String,
+        },
+        trackingId: {
+            type: String,
+        },
+        adminNotes: {
+            type: String,
+        },
 	},
 	{ timestamps: true }
 );

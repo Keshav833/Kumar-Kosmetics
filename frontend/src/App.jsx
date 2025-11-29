@@ -16,13 +16,15 @@ import Signup from './pages/Signup'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import VerifyOtp from './pages/auth/VerifyOtp'
 import ResetPassword from './pages/auth/ResetPassword'
-import Contact from './pages/Contact'
+import ContactPage from './pages/ContactPage'
+import AdminContactMessages from './components/admin/AdminContactMessages'
 import SkinAnalyzer from './pages/SkinAnalyzer'
 import Admin from './pages/Admin'
 import AddProduct from './pages/admin/AddProduct'
 import AuthModal from './components/auth/AuthModal'
 import Profile from './pages/Profile'
 import Wishlist from "./pages/Wishlist";
+import OrderSuccess from "./pages/OrderSuccess";
 
 function App() {
   const { authUser, checkAuth, checkingAuth } = useAuthStore();
@@ -51,12 +53,14 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/skin-analyzer" element={<SkinAnalyzer />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/add-product" element={<AddProduct />} />
+        <Route path="/admin/messages" element={<AdminContactMessages />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/" />} />
         <Route path="/wishlist" element={authUser ? <Wishlist /> : <Navigate to="/login" />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
       </Routes>
       <AuthModal />
       <Toaster />

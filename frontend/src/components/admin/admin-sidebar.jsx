@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { LayoutDashboard, Package, ShoppingCart, Folder, Users } from "lucide-react"
+import { LayoutDashboard, Package, ShoppingCart, Folder, Users, Mail } from "lucide-react"
 
 const AdminSidebar = ({ currentSection, setCurrentSection }) => {
   const menuItems = [
@@ -8,6 +8,7 @@ const AdminSidebar = ({ currentSection, setCurrentSection }) => {
     { id: "orders", label: "Orders", icon: ShoppingCart },
     { id: "categories", label: "Categories", icon: Folder },
     { id: "customers", label: "Customers", icon: Users },
+    { id: "messages", label: "Messages", icon: Mail },
   ]
 
   return (

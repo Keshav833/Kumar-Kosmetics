@@ -8,6 +8,7 @@ import { useCartStore } from "@/store/useCartStore"
 import { useWishlistStore } from "@/store/useWishlistStore"
 import axiosInstance from "@/lib/axios"
 import toast from "react-hot-toast"
+import ProductReviews from "@/components/product/product-reviews"
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -21,21 +22,22 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true)
   const [selectedVariant, setSelectedVariant] = useState(null)
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await axiosInstance.get(`/products/${id}`)
-        setProduct(res.data)
-        if (res.data.variants && res.data.variants.length > 0) {
-            setSelectedVariant(res.data.variants[0].name)
-        }
-      } catch (error) {
-        console.error("Error fetching product:", error)
-        toast.error("Failed to load product details")
-      } finally {
-        setLoading(false)
+  const fetchProduct = async () => {
+    try {
+      const res = await axiosInstance.get(`/products/${id}`)
+      setProduct(res.data)
+      if (res.data.variants && res.data.variants.length > 0 && !selectedVariant) {
+          setSelectedVariant(res.data.variants[0].name)
       }
+    } catch (error) {
+      console.error("Error fetching product:", error)
+      toast.error("Failed to load product details")
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchProduct()
   }, [id])
 
@@ -119,7 +121,7 @@ export default function ProductDetail() {
 
             {/* Rating */}
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-xl text-primary">★ {product.rating || "New"}</span>
+              <span className="text-xl text-primary">★ {product.rating ? product.rating.toFixed(1) : "New"}</span>
               <span className="text-sm text-muted-foreground">({product.reviews || 0} reviews)</span>
             </div>
 
@@ -262,18 +264,12 @@ export default function ProductDetail() {
           )}
 
           {activeTab === "reviews" && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-semibold text-foreground">Customer Reviews</h3>
-                <button 
-                  onClick={() => !authUser ? openAuthModal({ type: "review" }) : toast.success("Review form coming soon!")}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-                >
-                  Write a Review
-                </button>
-              </div>
-              <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
-            </div>
+            <ProductReviews 
+              productId={product._id} 
+              productRating={product.rating} 
+              totalReviews={product.reviews} 
+              onReviewAdded={fetchProduct}
+            />
           )}
         </div>
       </div>

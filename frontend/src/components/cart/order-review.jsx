@@ -5,10 +5,10 @@ export default function OrderReview({ items, subtotal, tax, shipping, total }) {
 
       {/* Items */}
       <div className="space-y-4 pb-6 border-b border-border">
-        {items.map(item => (
-          <div key={item.id} className="flex gap-3">
-            <div className="w-12 h-12 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-              <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-full h-full object-cover" />
+        {items.map((item, index) => (
+          <div key={item.id || index} className="flex gap-3">
+            <div className="w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0 border border-border">
+              <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-full h-full object-contain p-1" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">{item.name}</p>

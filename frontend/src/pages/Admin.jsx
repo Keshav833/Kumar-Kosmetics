@@ -8,6 +8,7 @@ import ProductsManager from "@/components/admin/products-manager"
 import OrdersSection from "@/components/admin/orders-section"
 import CategoriesSection from "@/components/product/categories-section"
 import CustomersSection from "@/components/admin/customers-section"
+import AdminContactMessages from "@/components/admin/AdminContactMessages"
 
 export default function Admin() {
   const [currentSection, setCurrentSection] = useState("overview")
@@ -26,12 +27,22 @@ export default function Admin() {
     fetchProducts();
   }, []);
 
-  const [orders, setOrders] = useState([
-    { id: "#KK-001", customer: "Priya Sharma", date: "2024-11-15", total: 5398, status: "Delivered" },
-    { id: "#KK-002", customer: "Aisha Patel", date: "2024-11-14", total: 3299, status: "Processing" },
-    { id: "#KK-003", customer: "Neha Gupta", date: "2024-11-13", total: 7597, status: "Shipped" },
-    { id: "#KK-004", customer: "Raj Kumar", date: "2024-11-12", total: 2499, status: "Pending" },
-  ])
+  const [orders, setOrders] = useState([])
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await axiosInstance.get("/orders/admin");
+        setOrders(res.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("Failed to fetch orders");
+      }
+    };
+    if (currentSection === "orders") {
+        fetchOrders();
+    }
+  }, [currentSection]);
 
   return (
     <div className="flex h-screen bg-background">
@@ -46,6 +57,7 @@ export default function Admin() {
           {currentSection === "orders" && <OrdersSection orders={orders} setOrders={setOrders} />}
           {currentSection === "categories" && <CategoriesSection />}
           {currentSection === "customers" && <CustomersSection />}
+          {currentSection === "messages" && <AdminContactMessages />}
         </main>
       </div>
     </div>
