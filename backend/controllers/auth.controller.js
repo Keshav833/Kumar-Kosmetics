@@ -222,3 +222,13 @@ export const resetPassword = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({ role: "customer" }).select("-password");
+        res.json(users);
+    } catch (error) {
+        console.error("Error in getAllUsers controller", error.message);
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+};

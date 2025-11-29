@@ -44,6 +44,23 @@ export default function Admin() {
     }
   }, [currentSection]);
 
+  const [customers, setCustomers] = useState([])
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await axiosInstance.get("/auth/users");
+        setCustomers(res.data);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+        toast.error("Failed to fetch customers");
+      }
+    };
+    if (currentSection === "customers") {
+        fetchCustomers();
+    }
+  }, [currentSection]);
+
   return (
     <div className="flex h-screen bg-background">
       <AdminSidebar currentSection={currentSection} setCurrentSection={setCurrentSection} />
@@ -56,7 +73,7 @@ export default function Admin() {
           {currentSection === "products" && <ProductsManager products={products} setProducts={setProducts} />}
           {currentSection === "orders" && <OrdersSection orders={orders} setOrders={setOrders} />}
           {currentSection === "categories" && <CategoriesSection />}
-          {currentSection === "customers" && <CustomersSection />}
+          {currentSection === "customers" && <CustomersSection customers={customers} />}
           {currentSection === "messages" && <AdminContactMessages />}
         </main>
       </div>
