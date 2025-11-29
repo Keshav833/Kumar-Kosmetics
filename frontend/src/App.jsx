@@ -57,6 +57,7 @@ function App() {
         <Route path="/skin-analyzer" element={<SkinAnalyzer />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/add-product" element={<AddProduct />} />
+        <Route path="/admin/edit-product/:id" element={<AddProduct />} />
         <Route path="/admin/messages" element={<AdminContactMessages />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/" />} />
         <Route path="/wishlist" element={authUser ? <Wishlist /> : <Navigate to="/login" />} />

@@ -120,6 +120,7 @@ export default function OrderDetails({ order, onClose, onUpdate }) {
                   <div>
                     <p className="font-medium">{order.user?.name || "Unknown"}</p>
                     <p className="text-sm text-muted-foreground">{order.user?.email}</p>
+                    <p className="text-sm text-muted-foreground">{order.user?.phone}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">

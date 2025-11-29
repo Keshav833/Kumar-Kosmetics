@@ -36,7 +36,7 @@ export const getUserOrders = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find().populate("user", "name email").sort({ createdAt: -1 });
+        const orders = await Order.find().populate("user", "name email phone").sort({ createdAt: -1 });
         res.json(orders);
     } catch (error) {
         console.log("Error in getAllOrders", error);

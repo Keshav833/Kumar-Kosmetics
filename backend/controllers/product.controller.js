@@ -110,3 +110,86 @@ export const getProductById = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+export const updateProduct = async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      category,
+      price,
+      discountPrice,
+      stock,
+      images,
+      status,
+      featured,
+      skinType,
+      skinConcerns,
+      ingredients,
+      allergyLabels,
+      variants,
+    } = req.body;
+
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    let imageUrls = product.images || [];
+    if (images && images.length > 0) {
+      // If new images are provided, we might want to replace or append. 
+      // For simplicity and matching AddProduct logic, if images array is sent, we assume it's the new state.
+      // We need to upload new base64 images.
+      const newImageUrls = [];
+      for (const image of images) {
+        if (image.startsWith("data:image")) {
+          const uploadResponse = await cloudinary.uploader.upload(image, {
+            folder: "products",
+          });
+          newImageUrls.push(uploadResponse.secure_url);
+        } else {
+          newImageUrls.push(image);
+        }
+      }
+      imageUrls = newImageUrls;
+    }
+
+    // Handle Variants
+    let processedVariants = product.variants || [];
+    if (variants) {
+        const newVariants = [];
+        for (const variant of variants) {
+            let variantImageUrl = variant.image;
+            if (variant.image && variant.image.startsWith("data:image")) {
+                const uploadResponse = await cloudinary.uploader.upload(variant.image, {
+                    folder: "products/variants",
+                });
+                variantImageUrl = uploadResponse.secure_url;
+            }
+            newVariants.push({ ...variant, image: variantImageUrl });
+        }
+        processedVariants = newVariants;
+    }
+
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.category = category || product.category;
+    product.price = price || product.price;
+    product.discountPrice = discountPrice !== undefined ? discountPrice : product.discountPrice;
+    product.stock = stock || product.stock;
+    product.images = imageUrls;
+    product.status = status || product.status;
+    product.featured = featured !== undefined ? featured : product.featured;
+    product.skinType = skinType || product.skinType;
+    product.skinConcerns = skinConcerns || product.skinConcerns;
+    product.ingredients = ingredients || product.ingredients;
+    product.allergyLabels = allergyLabels || product.allergyLabels;
+    product.variants = processedVariants;
+
+    const updatedProduct = await product.save();
+
+    res.json(updatedProduct);
+  } catch (error) {
+    console.error("Error in updateProduct controller:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

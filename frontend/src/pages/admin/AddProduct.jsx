@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, Trash, Upload, X, Loader } from "lucide-react";
 import axiosInstance from "../../lib/axios";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const categories = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "Toner", "Treatment"];
 const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
@@ -46,6 +46,44 @@ const AddProduct = () => {
   });
 
   const [newVariant, setNewVariant] = useState({ name: "", stock: "", image: "" });
+
+  const { id } = useParams();
+  const isEditMode = !!id;
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get(`/products/${id}`);
+      const product = res.data;
+      setFormData({
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        discountPrice: product.discountPrice || "",
+        stock: product.stock,
+        status: product.status || "Active",
+        featured: product.featured || false,
+        ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(", ") : product.ingredients,
+        skinType: product.skinType || [],
+        skinConcerns: product.skinConcerns || [],
+        allergyLabels: product.allergyLabels || [],
+        images: product.images || [],
+        variants: product.variants || [],
+      });
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      toast.error("Failed to fetch product details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -125,12 +163,17 @@ const AddProduct = () => {
         ingredients: formData.ingredients.split(",").map((item) => item.trim()),
       };
 
-      const res = await axiosInstance.post("/products", processedData);
-      toast.success("Product created successfully");
+      if (isEditMode) {
+        await axiosInstance.put(`/products/${id}`, processedData);
+        toast.success("Product updated successfully");
+      } else {
+        await axiosInstance.post("/products", processedData);
+        toast.success("Product created successfully");
+      }
       navigate("/admin");
     } catch (error) {
-      console.error("Error creating product:", error);
-      toast.error(error.response?.data?.message || "Failed to create product");
+      console.error("Error saving product:", error);
+      toast.error(error.response?.data?.message || "Failed to save product");
     } finally {
       setLoading(false);
     }
@@ -145,8 +188,8 @@ const AddProduct = () => {
           className="bg-white rounded-xl shadow-lg overflow-hidden"
         >
           <div className="px-6 py-4 bg-emerald-600 border-b border-emerald-500">
-            <h2 className="text-2xl font-bold text-white">Add New Product</h2>
-            <p className="text-emerald-100 mt-1">Create a new product with skin analysis details</p>
+            <h2 className="text-2xl font-bold text-white">{isEditMode ? "Edit Product" : "Add New Product"}</h2>
+            <p className="text-emerald-100 mt-1">{isEditMode ? "Update product details" : "Create a new product with skin analysis details"}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-8">
@@ -456,7 +499,7 @@ const AddProduct = () => {
                 ) : (
                   <>
                     <Plus className="w-5 h-5 mr-2" />
-                    Create Product
+                    {isEditMode ? "Update Product" : "Create Product"}
                   </>
                 )}
               </button>
