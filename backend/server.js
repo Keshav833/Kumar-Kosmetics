@@ -27,7 +27,7 @@ const __dirname = path.resolve();
 app.use(express.json({ limit: "10mb" })); // allows you to parse the body of the request
 app.use(cookieParser());
 app.use(cors({
-	origin: "http://localhost:3000",
+	origin: process.env.FRONTEND_URL,
 	credentials: true,
 }));
 
