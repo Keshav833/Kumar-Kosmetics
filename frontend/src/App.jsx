@@ -28,6 +28,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 
 function App() {
   const { authUser, checkAuth, checkingAuth } = useAuthStore();
+  console.log("Vercel API URL:", import.meta.env.VITE_API_URL);
 
   useEffect(() => {
     checkAuth();
