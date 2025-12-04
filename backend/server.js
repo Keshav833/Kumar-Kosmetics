@@ -24,22 +24,21 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
-app.use(express.json({ limit: "10mb" })); // allows you to parse the body of the request
+// Middleware
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(cors({
 	origin: process.env.FRONTEND_URL,
 	credentials: true,
 }));
 
+// Security Headers
 app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   next();
 });
 
-app.get("/", (req, res) => {
-	res.send("Hello World !");
-});
-
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/products", productRoutes);
@@ -50,6 +49,12 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/orders", orderRoutes);
 
+// Health Check
+app.get("/", (req, res) => {
+	res.json({ message: "Server is running", status: "OK" });
+});
+
+// Maintenance/Utils
 app.get("/api/drop-index", async (req, res) => {
     try {
         const indexName = "stripeSessionId_1";
@@ -66,6 +71,7 @@ app.get("/api/drop-index", async (req, res) => {
     }
 });
 
+// Start Server
 app.listen(PORT, () => {
 	console.log("Server is running on http://localhost:" + PORT);
 	connectDB();
