@@ -28,8 +28,11 @@ const __dirname = path.resolve();
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(cors({
-	origin: process.env.FRONTEND_URL,
-	credentials: true,
+  origin: [
+    "http://localhost:3000",
+    "https://kumar-kosmetics.vercel.app"
+  ],
+  credentials: true,
 }));
 
 // Security Headers

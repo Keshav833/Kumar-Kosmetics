@@ -13,7 +13,7 @@ export default function Products() {
     priceRange: [0, 5000],
     concern: [],
   })
-
+  console.log("Vercel API URL:", import.meta.env.VITE_API_URL);
   const [viewType, setViewType] = useState("grid")
   const [products, setProducts] = useState([])
 
