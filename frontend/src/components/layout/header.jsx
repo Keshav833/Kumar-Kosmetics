@@ -13,8 +13,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img src="/KKLogo.png" alt="Kumar Kosmetics Logo" className="w-10 h-10 object-contain" />
-          <span className="text-xl font-semibold text-foreground">Kumar Kosmetics</span>
+          <img src="/kumarKosmetics.png" alt="Kumar Kosmetics" className="h-12 w-auto object-contain" />
         </Link>
 
         {/* Navigation - Desktop */}
@@ -81,9 +80,9 @@ export default function Header() {
               </div>
             </div>
           ) : (
-            <button onClick={() => openAuthModal()} className="p-2 hover:bg-muted rounded-lg transition-colors">
+            <Link to="/login" className="p-2 hover:bg-muted rounded-lg transition-colors">
               <User className="w-5 h-5 text-foreground" />
-            </button>
+            </Link>
           )}
         </div>
       </div>
