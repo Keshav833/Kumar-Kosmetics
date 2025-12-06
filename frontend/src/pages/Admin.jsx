@@ -3,7 +3,7 @@ import axiosInstance from "../lib/axios"
 import toast from "react-hot-toast"
 import AdminHeader from "@/components/admin/admin-header"
 import AdminSidebar from "@/components/admin/admin-sidebar"
-import DashboardOverview from "@/components/admin/dashboard-overview"
+import DashboardOverview from "../components/admin/dashboard-overview"
 import ProductsManager from "@/components/admin/products-manager"
 import OrdersSection from "@/components/admin/orders-section"
 import CategoriesSection from "@/components/product/categories-section"
@@ -39,7 +39,7 @@ export default function Admin() {
         toast.error("Failed to fetch orders");
       }
     };
-    if (currentSection === "orders") {
+    if (currentSection === "orders" || currentSection === "overview") {
         fetchOrders();
     }
   }, [currentSection]);
@@ -56,7 +56,7 @@ export default function Admin() {
         toast.error("Failed to fetch customers");
       }
     };
-    if (currentSection === "customers") {
+    if (currentSection === "customers" || currentSection === "overview") {
         fetchCustomers();
     }
   }, [currentSection]);
@@ -69,7 +69,7 @@ export default function Admin() {
         <AdminHeader />
 
         <main className="flex-1 overflow-y-auto">
-          {currentSection === "overview" && <DashboardOverview products={products} />}
+          {currentSection === "overview" && <DashboardOverview products={products} orders={orders} customers={customers} />}
           {currentSection === "products" && <ProductsManager products={products} setProducts={setProducts} />}
           {currentSection === "orders" && <OrdersSection orders={orders} setOrders={setOrders} />}
           {currentSection === "categories" && <CategoriesSection />}

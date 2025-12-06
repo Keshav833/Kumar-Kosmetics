@@ -8,7 +8,7 @@ export default function AdminHeader() {
   const { authUser } = useAuthStore()
 
   return (
-    <header className="bg-white border-b border-border">
+    <header className="bg-background border-b border-border sticky top-0 z-20">
       <div className="flex items-center justify-between px-8 py-4">
         <div className="flex items-center gap-4">
           <h1 className="text-lg font-semibold text-foreground">Admin Dashboard</h1>

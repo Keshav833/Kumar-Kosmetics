@@ -12,12 +12,13 @@ const AdminSidebar = ({ currentSection, setCurrentSection }) => {
   ]
 
   return (
-    <aside className="w-64 bg-white border-r border-border">
+    <aside className="w-64 bg-sidebar border-r border-sidebar-border text-sidebar-foreground">
       {/* Logo */}
       <div className="px-6 py-8">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-full" />
-          <span className="text-lg font-semibold text-foreground">Kumar</span>
+          {/* <div className="w-8 h-8 bg-sidebar-primary rounded-full" /> */}
+          <img src="/kumarKosmetics.png" alt="Kumar Kosmetics" className="h-12 w-auto object-contain" />
+          {/* <span className="text-lg font-semibold text-sidebar-foreground">Kumar</span> */}
         </Link>
       </div>
 
@@ -32,7 +33,9 @@ const AdminSidebar = ({ currentSection, setCurrentSection }) => {
               key={item.id}
               onClick={() => setCurrentSection(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
+                isActive 
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground" 
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -43,8 +46,8 @@ const AdminSidebar = ({ currentSection, setCurrentSection }) => {
       </nav>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-border p-4 w-64">
-        <button className="w-full px-4 py-3 text-foreground hover:bg-muted rounded-lg font-medium transition-colors text-sm">
+      <div className="absolute bottom-0 left-0 right-0 border-t border-sidebar-border p-4 w-64">
+        <button className="w-full px-4 py-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg font-medium transition-colors text-sm">
           Logout
         </button>
       </div>
