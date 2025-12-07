@@ -28,7 +28,7 @@ import {
   Cell,
   Area
 } from "recharts"
-import { format, subDays, isAfter, parseISO } from "date-fns"
+import { format, subDays, isAfter, parseISO, isToday } from "date-fns"
 
 export default function DashboardOverview({ products = [], orders = [], customers = [] }) {
   const [dateRange, setDateRange] = useState("7d")
@@ -237,7 +237,7 @@ export default function DashboardOverview({ products = [], orders = [], customer
         .slice(0, 5)
         .map(act => ({
             ...act,
-            time: format(act.rawTime, "MMM d, HH:mm") 
+            time: isToday(act.rawTime) ? `Today, ${format(act.rawTime, "HH:mm")}` : format(act.rawTime, "MMM d, HH:mm") 
         }))
   }, [orders, customers])
 

@@ -6,7 +6,6 @@ const AdminSidebar = ({ currentSection, setCurrentSection }) => {
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "products", label: "Products", icon: Package },
     { id: "orders", label: "Orders", icon: ShoppingCart },
-    { id: "categories", label: "Categories", icon: Folder },
     { id: "customers", label: "Customers", icon: Users },
     { id: "messages", label: "Messages", icon: Mail },
   ]
@@ -17,12 +16,8 @@ const AdminSidebar = ({ currentSection, setCurrentSection }) => {
       <div className="h-20 flex items-center justify-center border-b border-slate-800/50">
         <Link to="/" className="flex items-center gap-3 group">
              {/* Logo Container */}
-             <div className="p-1.5 bg-white rounded-lg group-hover:scale-105 transition-transform duration-300">
-               <img src="/kumarKosmetics.png" alt="Kumar Kosmetics" className="h-8 w-auto object-contain" />
-             </div>
-             <div className="flex flex-col">
-               <span className="font-bold text-white text-sm tracking-wide">KUMAR</span>
-               <span className="text-[10px] text-slate-400 uppercase tracking-widest">Admin Panel</span>
+             <div className="group-hover:scale-105 transition-transform duration-300">
+               <img src="/darkKumarKosmetics.png" alt="Kumar Kosmetics" className="h-10 w-auto object-contain" />
              </div>
         </Link>
       </div>
