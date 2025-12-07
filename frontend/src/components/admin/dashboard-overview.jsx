@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { 
   LineChart, 
+  AreaChart,
   Line, 
   XAxis, 
   YAxis, 
@@ -298,11 +299,11 @@ export default function DashboardOverview({ products = [], orders = [], customer
           </div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={salesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <AreaChart data={salesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.5} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                    </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -327,17 +328,17 @@ export default function DashboardOverview({ products = [], orders = [], customer
                   cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }}
                   formatter={(value) => [`₹${value}`, "Revenue"]}
                 />
-                <Line 
+                <Area 
                   type="monotone" 
                   dataKey="revenue" 
                   stroke="#6366f1" 
-                  strokeWidth={3} 
+                  strokeWidth={3}
+                  fill="url(#colorRevenue)" 
+                  fillOpacity={1}
                   dot={{ r: 4, fill: "#fff", strokeWidth: 2, stroke: "#6366f1" }} 
                   activeDot={{ r: 6, fill: "#6366f1", stroke: "#fff", strokeWidth: 2 }} 
-                  fill="url(#colorRevenue)"
                 />
-                <Area type="monotone" dataKey="revenue" stroke="none" fill="url(#colorRevenue)" />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </motion.div>

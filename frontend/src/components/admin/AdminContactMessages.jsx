@@ -56,20 +56,28 @@ export default function AdminContactMessages() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="p-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Messages</h2>
-          <p className="text-gray-500 text-sm mt-1">Manage inquiries from your customers</p>
+          <h2 className="text-3xl font-light text-foreground">
+            <span className="font-semibold">Messages</span>
+            <span className="text-lg text-muted-foreground ml-2">
+              ({messages.length})
+            </span>
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            Manage inquiries from your customers
+          </p>
         </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <input
             type="text"
-            placeholder="Search by name, email, or subject..."
+            placeholder="Search messages..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white shadow-sm"
+            className="pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-full md:w-64"
           />
         </div>
       </div>

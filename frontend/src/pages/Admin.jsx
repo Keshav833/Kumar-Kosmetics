@@ -62,10 +62,10 @@ export default function Admin() {
   }, [currentSection]);
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-slate-900">
       <AdminSidebar currentSection={currentSection} setCurrentSection={setCurrentSection} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 rounded-l-2xl shadow-2xl my-2 mr-2">
         
         <main className="flex-1 overflow-y-auto">
           {currentSection === "overview" && <DashboardOverview products={products} orders={orders} customers={customers} />}
