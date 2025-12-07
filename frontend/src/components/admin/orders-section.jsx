@@ -3,6 +3,7 @@ import axiosInstance from "@/lib/axios";
 import { toast } from "react-hot-toast";
 import { Eye } from "lucide-react";
 import OrderDetails from "./order-details";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function OrdersSection({ orders = [], setOrders = () => {} }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -39,40 +40,49 @@ export default function OrdersSection({ orders = [], setOrders = () => {} }) {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
-              <tr key={order._id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                <td className="px-6 py-4 text-sm font-medium text-primary">#{order._id.slice(-6)}</td>
-                <td className="px-6 py-4 text-sm text-foreground">
-                    <div>
-                        <p className="font-medium">{order.user?.name || "Unknown"}</p>
-                        <p className="text-xs text-muted-foreground">{order.user?.email}</p>
-                    </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</td>
-                <td className="px-6 py-4 text-sm font-semibold text-foreground">₹{order.totalAmount}</td>
-                <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        order.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
-                        {order.paymentStatus}
+            <AnimatePresence>
+              {orders.map((order, idx) => (
+                <motion.tr 
+                  key={order._id} 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="border-b border-border hover:bg-muted/50 transition-colors"
+                >
+                  <td className="px-6 py-4 text-sm font-medium text-primary">#{order._id.slice(-6)}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">
+                      <div>
+                          <p className="font-medium">{order.user?.name || "Unknown"}</p>
+                          <p className="text-xs text-muted-foreground">{order.user?.email}</p>
+                      </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-foreground">₹{order.totalAmount}</td>
+                  <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          order.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                          {order.paymentStatus}
+                      </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || "bg-gray-100"}`}>
+                      {order.status}
                     </span>
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || "bg-gray-100"}`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <button 
-                    onClick={() => setSelectedOrder(order)}
-                    className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors"
-                    title="View Details"
-                  >
-                    <Eye className="w-5 h-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <button 
+                      onClick={() => setSelectedOrder(order)}
+                      className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors"
+                      title="View Details"
+                    >
+                      <Eye className="w-5 h-5" />
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </AnimatePresence>
           </tbody>
         </table>
       </div>

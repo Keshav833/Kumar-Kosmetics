@@ -66,8 +66,7 @@ export default function Admin() {
       <AdminSidebar currentSection={currentSection} setCurrentSection={setCurrentSection} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminHeader />
-
+        
         <main className="flex-1 overflow-y-auto">
           {currentSection === "overview" && <DashboardOverview products={products} orders={orders} customers={customers} />}
           {currentSection === "products" && <ProductsManager products={products} setProducts={setProducts} />}

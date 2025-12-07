@@ -1,4 +1,4 @@
-import Product from "../models/product.model.js";
+import Product from "../models/Product.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
 export const createProduct = async (req, res) => {
@@ -104,6 +104,11 @@ export const getProductById = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    
+    // Increment view count
+    product.views = (product.views || 0) + 1;
+    await product.save();
+
     res.json(product);
   } catch (error) {
     console.error("Error in getProductById controller", error.message);

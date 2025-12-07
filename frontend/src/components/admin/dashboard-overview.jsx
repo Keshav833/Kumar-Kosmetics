@@ -24,7 +24,8 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  Area
 } from "recharts"
 import { format, subDays, isAfter, parseISO } from "date-fns"
 
@@ -129,13 +130,37 @@ export default function DashboardOverview({ products = [], orders = [], customer
     ]
   }, [orders, dateRange])
 
-  // Skin Intelligence Data
-  const skinTypeData = [
-    { name: "Oily", value: 35, color: "#10b981" },
-    { name: "Dry", value: 25, color: "#3b82f6" },
-    { name: "Combination", value: 30, color: "#8b5cf6" },
-    { name: "Sensitive", value: 10, color: "#f43f5e" },
-  ]
+  // Skin Intelligence Data (Real-Time)
+  const skinTypeData = useMemo(() => {
+    if (!customers || customers.length === 0) return []
+
+    const counts = { Oily: 0, Dry: 0, Combination: 0, Sensitive: 0, Normal: 0 }
+    let hasData = false
+
+    customers.forEach(c => {
+        if (c.skinProfile && c.skinProfile.skinType) {
+            const type = c.skinProfile.skinType
+            if (counts[type] !== undefined) {
+                counts[type]++
+                hasData = true
+            }
+        }
+    })
+
+    if (!hasData) {
+         // Fallback if no data yet (Single Gray Slice)
+         return [
+            { name: "No Data", value: 100, color: "#f1f5f9" }, // slate-100
+         ]
+    }
+
+    return [
+        { name: "Oily", value: counts.Oily, color: "#10b981" },
+        { name: "Dry", value: counts.Dry, color: "#3b82f6" },
+        { name: "Combination", value: counts.Combination, color: "#8b5cf6" },
+        { name: "Sensitive", value: counts.Sensitive, color: "#f43f5e" },
+    ].filter(item => item.value > 0)
+  }, [customers])
 
   // Inventory Health
   const separateStock = useMemo(() => {
@@ -152,6 +177,10 @@ export default function DashboardOverview({ products = [], orders = [], customer
             if (order.items && Array.isArray(order.items)) {
                 order.items.forEach(item => {
                    const pid = item.product || item._id || item.name 
+                   
+                   // Find current product details to get real-time views
+                   const currentProduct = products.find(p => p._id === pid) || {}
+
                    if (!productSales[pid]) {
                        productSales[pid] = {
                            name: item.name,
@@ -159,17 +188,24 @@ export default function DashboardOverview({ products = [], orders = [], customer
                            revenue: 0,
                            image: item.image,
                            price: item.price,
-                           category: item.category
+                           category: item.category,
+                           views: currentProduct.views || 0 // Use real views
                        }
                    }
                    productSales[pid].sales += (item.quantity || 1)
                    productSales[pid].revenue += (item.price * (item.quantity || 1))
+                   // Ensure views are updated if product was found later
+                   if(currentProduct.views) productSales[pid].views = currentProduct.views
                 })
             }
         })
         return Object.values(productSales).sort((a, b) => b.sales - a.sales).slice(0, 5)
     }
-    return [...products].sort((a, b) => b.price - a.price).slice(0, 3)
+    return [...products].sort((a, b) => b.price - a.price).slice(0, 3).map(p => ({
+        ...p,
+        sales: 0,
+        views: p.views || 0
+    }))
   }, [products, orders])
 
   // Recent Activity
@@ -236,57 +272,71 @@ export default function DashboardOverview({ products = [], orders = [], customer
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* 2. Sales Overview Chart */}
+        {/* 2. Sales Overview Chart */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="lg:col-span-2 bg-card p-6 rounded-xl shadow-sm border border-border"
+          className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
         >
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-lg font-bold text-card-foreground">Sales Overview</h3>
-              <p className="text-muted-foreground text-sm">Revenue performance</p>
+              <h3 className="text-lg font-bold text-slate-800">Sales Overview</h3>
+              <p className="text-slate-400 text-sm mt-1">Revenue performance over time</p>
             </div>
-            <select 
-              value={dateRange} 
-              onChange={(e) => setDateRange(e.target.value)}
-              className="bg-muted border border-input text-foreground text-sm rounded-lg p-2 focus:ring-primary focus:border-primary outline-none"
-            >
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-            </select>
+            <div className="relative">
+                <select 
+                  value={dateRange} 
+                  onChange={(e) => setDateRange(e.target.value)}
+                  className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg py-2 pl-4 pr-10 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none cursor-pointer font-medium"
+                >
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                </select>
+                 <ArrowDownRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
           </div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={salesData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <LineChart data={salesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                   </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} 
+                  tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }} 
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} 
+                  width={80}
+                  tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }} 
                   tickFormatter={(value) => `₹${value}`}
                 />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--card)', borderRadius: '8px', border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  itemStyle={{ color: 'var(--card-foreground)' }}
+                  contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ color: '#1e293b', fontWeight: 600 }}
+                  labelStyle={{ color: '#64748b', marginBottom: '0.5rem', fontSize: '12px' }}
+                  cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }}
                   formatter={(value) => [`₹${value}`, "Revenue"]}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="revenue" 
-                  stroke="var(--primary)" 
+                  stroke="#6366f1" 
                   strokeWidth={3} 
-                  dot={{ r: 4, fill: "var(--primary)", strokeWidth: 2, stroke: "#fff" }} 
-                  activeDot={{ r: 6 }} 
+                  dot={{ r: 4, fill: "#fff", strokeWidth: 2, stroke: "#6366f1" }} 
+                  activeDot={{ r: 6, fill: "#6366f1", stroke: "#fff", strokeWidth: 2 }} 
                   fill="url(#colorRevenue)"
                 />
+                <Area type="monotone" dataKey="revenue" stroke="none" fill="url(#colorRevenue)" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -359,16 +409,24 @@ export default function DashboardOverview({ products = [], orders = [], customer
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-xs text-muted-foreground">Top Type</span>
-                <span className="text-lg font-bold text-card-foreground">Oily</span>
+                <span className="text-lg font-bold text-card-foreground">
+                    {(skinTypeData.length === 0 || (skinTypeData.length === 1 && skinTypeData[0].name === "No Data")) 
+                        ? "---" 
+                        : skinTypeData.reduce((prev, current) => (prev.value > current.value) ? prev : current).name}
+                </span>
               </div>
             </div>
             <div className="flex justify-center gap-3 mt-2">
-              {skinTypeData.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-[10px] text-muted-foreground">{item.name}</span>
-                </div>
-              ))}
+              {(skinTypeData.length === 0 || (skinTypeData.length === 1 && skinTypeData[0].name === "No Data")) ? (
+                  <span className="text-xs text-muted-foreground mt-2">No analysis data yet</span>
+              ) : (
+                  skinTypeData.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-[10px] text-muted-foreground">{item.name}</span>
+                    </div>
+                  ))
+              )}
             </div>
           </motion.div>
         </div>
@@ -421,7 +479,7 @@ export default function DashboardOverview({ products = [], orders = [], customer
                     <td className="py-4 text-right text-sm text-slate-600 font-medium">{product.sales !== undefined ? product.sales : '0'}</td>
                     <td className="py-4 text-right">
                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-full font-medium">
-                         <Eye size={12} /> {product.sales * 12 || 0}
+                         <Eye size={12} /> {product.views || 0}
                        </span>
                     </td>
                   </tr>

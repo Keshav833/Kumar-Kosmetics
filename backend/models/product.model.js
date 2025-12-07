@@ -52,6 +52,10 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    views: {
+      type: Number,
+      default: 0,
+    },
     // Skin Recommendation Fields
     skinType: [
       {
@@ -102,6 +106,6 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Product = mongoose.model("Product", productSchema);
+const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
 
 export default Product;

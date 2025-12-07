@@ -232,3 +232,28 @@ export const getAllUsers = async (req, res) => {
         res.status(500).json({ message: "Server Error", error: error.message });
     }
 };
+
+export const updateSkinProfile = async (req, res) => {
+    try {
+        const { skinType, concerns, allergies } = req.body;
+        const userId = req.user._id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.skinProfile = {
+            skinType,
+            concerns,
+            allergies,
+            lastupdated: new Date()
+        };
+
+        await user.save();
+        res.json({ message: "Skin profile updated successfully", skinProfile: user.skinProfile });
+    } catch (error) {
+        console.error("Error in updateSkinProfile", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};

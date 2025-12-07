@@ -66,6 +66,12 @@ const userSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        skinProfile: {
+            skinType: { type: String, default: "" },
+            concerns: [String],
+            allergies: [String],
+            lastupdated: Date
+        },
 	},
 	{
 		timestamps: true,

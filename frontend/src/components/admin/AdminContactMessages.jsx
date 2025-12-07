@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
 import toast from "react-hot-toast";
 import { Trash2, Search, Mail, Loader, Eye, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminContactMessages() {
   const [messages, setMessages] = useState([]);
@@ -86,67 +87,80 @@ export default function AdminContactMessages() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredMessages.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-16 text-center text-gray-500">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                        <Mail className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-1">No messages found</h3>
-                      <p className="text-gray-500">We couldn't find any messages matching your search.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredMessages.map((msg) => (
-                  <tr key={msg._id} className="hover:bg-gray-50/80 transition-colors group">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{msg.name}</span>
-                        <a href={`mailto:${msg.email}`} className="text-sm text-gray-500 hover:text-primary transition-colors">
-                          {msg.email}
-                        </a>
+              <AnimatePresence>
+                {filteredMessages.length === 0 ? (
+                  <motion.tr
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <td colSpan="5" className="px-6 py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                          <Mail className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-1">No messages found</h3>
+                        <p className="text-gray-500">We couldn't find any messages matching your search.</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 font-medium bg-gray-100 px-2.5 py-1 rounded-md">
-                        {msg.subject || "No Subject"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600 line-clamp-1 max-w-xs">{msg.message}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-500">
-                        {new Date(msg.createdAt).toLocaleDateString("en-US", {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => setSelectedMessage(msg)}
-                          className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                          title="View Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(msg._id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete Message"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+                  </motion.tr>
+                ) : (
+                  filteredMessages.map((msg, idx) => (
+                    <motion.tr 
+                      key={msg._id} 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="hover:bg-gray-50/80 transition-colors group"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">{msg.name}</span>
+                          <a href={`mailto:${msg.email}`} className="text-sm text-gray-500 hover:text-primary transition-colors">
+                            {msg.email}
+                          </a>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 font-medium bg-gray-100 px-2.5 py-1 rounded-md">
+                          {msg.subject || "No Subject"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm text-gray-600 line-clamp-1 max-w-xs">{msg.message}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-500">
+                          {new Date(msg.createdAt).toLocaleDateString("en-US", {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setSelectedMessage(msg)}
+                            className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(msg._id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Message"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))
+                )}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>

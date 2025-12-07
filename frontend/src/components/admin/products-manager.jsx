@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Edit2, Trash2, Plus } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function ProductsManager({ products, setProducts }) {
   const navigate = useNavigate()
@@ -54,51 +55,60 @@ export default function ProductsManager({ products, setProducts }) {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
-                <tr key={product._id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                  <td className="px-6 py-4 text-sm">
-                    <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center border border-gray-100">
-                      <img
-                        src={product.images?.[0] || "/placeholder.svg"}
-                        alt={product.name}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-foreground">{product.name}</td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{product.category}</td>
-                  <td className="px-6 py-4 text-sm text-foreground font-medium">₹{product.price}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        product.stock > 30
-                          ? "bg-green-50 text-green-700"
-                          : product.stock > 10
-                            ? "bg-yellow-50 text-yellow-700"
-                            : "bg-red-50 text-red-700"
-                      }`}
-                    >
-                      {product.stock} units
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm flex gap-3">
-                    <button
-                      onClick={() => navigate(`/admin/edit-product/${product._id}`)}
-                      className="text-primary hover:text-primary/80 font-medium flex items-center gap-1"
-                    >
-                      <Edit2 size={16} />
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
-                    >
-                      <Trash2 size={16} />
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              <AnimatePresence>
+                {products.map((product, idx) => (
+                  <motion.tr 
+                    key={product._id} 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="border-b border-border hover:bg-muted/50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm">
+                      <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center border border-gray-100">
+                        <img
+                          src={product.images?.[0] || "/placeholder.svg"}
+                          alt={product.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-foreground">{product.name}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">{product.category}</td>
+                    <td className="px-6 py-4 text-sm text-foreground font-medium">₹{product.price}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          product.stock > 30
+                            ? "bg-green-50 text-green-700"
+                            : product.stock > 10
+                              ? "bg-yellow-50 text-yellow-700"
+                              : "bg-red-50 text-red-700"
+                        }`}
+                      >
+                        {product.stock} units
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm flex gap-3">
+                      <button
+                        onClick={() => navigate(`/admin/edit-product/${product._id}`)}
+                        className="text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+                      >
+                        <Edit2 size={16} />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
+                      >
+                        <Trash2 size={16} />
+                        Delete
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
