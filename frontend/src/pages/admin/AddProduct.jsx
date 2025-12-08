@@ -9,20 +9,21 @@ const categories = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "To
 const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
 const skinConcerns = [
   "Acne",
-  "Dullness",
   "Pigmentation",
-  "Anti-aging",
+  "Dullness",
   "Redness",
   "Dark spots",
-  "Uneven skin tone",
+  "Fine lines",
+  "Dehydration",
+  "Texture",
+  "Enlarged pores",
 ];
 const allergyLabels = [
   "Paraben-free",
-  "Sulfate-free",
   "Alcohol-free",
   "Fragrance-free",
+  "Essential-oil-free",
   "Silicone-free",
-  "Non-comedogenic",
 ];
 
 const AddProduct = () => {
@@ -45,7 +46,7 @@ const AddProduct = () => {
     variants: [],
   });
 
-  const [newVariant, setNewVariant] = useState({ name: "", stock: "", image: "" });
+  const [newVariant, setNewVariant] = useState({ name: "", stock: "", price: "", image: "" });
 
   const { id } = useParams();
   const isEditMode = !!id;
@@ -412,6 +413,16 @@ const AddProduct = () => {
                       type="number"
                       name="stock"
                       value={newVariant.stock}
+                      onChange={handleVariantChange}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={newVariant.price}
                       onChange={handleVariantChange}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
                     />

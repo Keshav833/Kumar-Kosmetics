@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
 import axiosInstance from "../lib/axios"
 import toast from "react-hot-toast"
 import AdminHeader from "@/components/admin/admin-header"
@@ -11,8 +12,15 @@ import CustomersSection from "@/components/admin/customers-section"
 import AdminContactMessages from "@/components/admin/AdminContactMessages"
 
 export default function Admin() {
+  const location = useLocation()
   const [currentSection, setCurrentSection] = useState("overview")
   const [products, setProducts] = useState([])
+  
+  useEffect(() => {
+    if (location.state?.section) {
+        setCurrentSection(location.state.section);
+    }
+  }, [location.state]);
   
   useEffect(() => {
     const fetchProducts = async () => {

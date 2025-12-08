@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Heart, Share2, Loader } from "lucide-react"
+import { Heart, Share2, Loader, ChevronLeft, ChevronRight } from "lucide-react"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useCartStore } from "@/store/useCartStore"
 import { useWishlistStore } from "@/store/useWishlistStore"
@@ -22,6 +22,10 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true)
   const [selectedVariant, setSelectedVariant] = useState(null)
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+  const [hoveredImage, setHoveredImage] = useState(null)
+
   const fetchProduct = async () => {
     try {
       const res = await axiosInstance.get(`/products/${id}`)
@@ -29,6 +33,10 @@ export default function ProductDetail() {
       if (res.data.variants && res.data.variants.length > 0 && !selectedVariant) {
           setSelectedVariant(res.data.variants[0].name)
       }
+      // Reset clicked image when product changes (and effect will handle variant change if we add it)
+      // Reset slider to 0 when product changes
+      setCurrentImageIndex(0)
+      setHoveredImage(null)
     } catch (error) {
       console.error("Error fetching product:", error)
       toast.error("Failed to load product details")
@@ -40,6 +48,34 @@ export default function ProductDetail() {
   useEffect(() => {
     fetchProduct()
   }, [id])
+
+  // Reset clicked image when selected variant changes to ensure variant image takes precedence default
+  // Handle auto-slider
+  useEffect(() => {
+    if (!product?.images?.length || isHovered) return
+
+    const interval = setInterval(() => {
+        setCurrentImageIndex(prev => (prev + 1) % product.images.length)
+    }, 10000) // 10 seconds
+
+    return () => clearInterval(interval)
+  }, [product, isHovered])
+
+  // Optional: Reset/Update slider when variant changes if needed
+  useEffect(() => {
+      setCurrentImageIndex(0)
+      setHoveredImage(null)
+  }, [selectedVariant])
+
+  const nextSlide = () => {
+    if (!product?.images?.length) return
+    setCurrentImageIndex((prev) => (prev + 1) % product.images.length)
+  }
+
+  const prevSlide = () => {
+    if (!product?.images?.length) return
+    setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length)
+  }
 
   const handleAddToCart = () => {
     if (!authUser) {
@@ -87,21 +123,50 @@ export default function ProductDetail() {
           {/* Gallery */}
           <div>
             <div className="w-full max-w-md mx-auto mb-6">
-              <div className="w-full h-80 bg-white rounded-xl overflow-hidden flex items-center justify-center border border-gray-100">
+              <div 
+                className="w-full h-80 bg-white rounded-xl overflow-hidden flex items-center justify-center border border-gray-100 relative group"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+              >
                 <img
                   src={
-                    selectedVariant 
-                      ? product.variants.find(v => v.name === selectedVariant)?.image || product.images?.[0] || "/placeholder.svg"
-                      : product.images?.[0] || "/placeholder.svg"
+                      hoveredImage ||
+                      product.images?.[currentImageIndex] ||
+                      (selectedVariant 
+                        ? product.variants.find(v => v.name === selectedVariant)?.image || "/placeholder.svg"
+                        : "/placeholder.svg")
                   }
                   alt={product.name}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain transition-opacity duration-500"
                 />
+                
+                {product.images?.length > 1 && (
+                    <>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); prevSlide() }}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <ChevronLeft className="w-6 h-6" />
+                        </button>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); nextSlide() }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <ChevronRight className="w-6 h-6" />
+                        </button>
+                    </>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {product.images?.map((img, idx) => (
-                <div key={idx} className="bg-white rounded-lg overflow-hidden cursor-pointer hover:ring-2 ring-primary h-24 flex items-center justify-center border border-gray-100">
+                <div 
+                    key={idx} 
+                    className={`bg-white rounded-lg overflow-hidden cursor-pointer hover:ring-2 ring-primary h-24 flex items-center justify-center border border-gray-100 ${currentImageIndex === idx ? "ring-2 ring-primary" : ""}`}
+                    onMouseEnter={() => setHoveredImage(img)}
+                    onMouseLeave={() => setHoveredImage(null)}
+                    onClick={() => setCurrentImageIndex(idx)}
+                >
                   <img
                     src={img || "/placeholder.svg"}
                     alt={`${product.name} ${idx + 1}`}

@@ -111,6 +111,9 @@ export const getProductById = async (req, res) => {
 
     res.json(product);
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(404).json({ message: "Product not found (Invalid ID)" });
+    }
     console.error("Error in getProductById controller", error.message);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
@@ -196,5 +199,135 @@ export const updateProduct = async (req, res) => {
   } catch (error) {
     console.error("Error in updateProduct controller:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const bulkCreateProducts = async (req, res) => {
+  try {
+    const { products } = req.body; // Expecting { products: [...] }
+
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ message: "No products provided or invalid format" });
+    }
+
+    let added = 0;
+    let failed = 0;
+    const errors = [];
+
+    for (let i = 0; i < products.length; i++) {
+        const productData = products[i];
+        try {
+            // Minimal Validation for required fields
+            if (!productData.name || !productData.category || !productData.price || !productData.stock) {
+                throw new Error("Missing required fields (name, category, price, stock)");
+            }
+
+            // Check if product with same name already exists
+            const existingProduct = await Product.findOne({ name: productData.name });
+            if (existingProduct) {
+                throw new Error(`Product with name "${productData.name}" already exists`);
+            }
+
+            const newProduct = new Product({
+                ...productData,
+                images: Array.isArray(productData.images) ? productData.images : [],
+                skinType: Array.isArray(productData.skinType) ? productData.skinType : [],
+                skinConcerns: Array.isArray(productData.skinConcerns) ? productData.skinConcerns : [],
+                allergyLabels: Array.isArray(productData.allergyLabels) ? productData.allergyLabels : [],
+                ingredients: Array.isArray(productData.ingredients) ? productData.ingredients : [],
+                variants: Array.isArray(productData.variants) ? productData.variants : [],
+            });
+
+            await newProduct.save();
+            added++;
+
+        } catch (err) {
+            failed++;
+            errors.push({ row: i + 1, name: productData.name || "Unknown", message: err.message });
+        }
+    }
+
+    res.status(201).json({
+        message: "Bulk upload processed",
+        summary: {
+            total: products.length,
+            added,
+            failed,
+        },
+        errors,
+    });
+
+  } catch (error) {
+    console.error("Error in bulkCreateProducts:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+export const deleteDuplicateProducts = async (req, res) => {
+  try {
+    // Find all products with duplicate names
+    const duplicates = await Product.aggregate([
+      {
+        $group: {
+          _id: "$name",
+          uniqueIds: { $addToSet: "$_id" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $match: {
+          count: { $gt: 1 }
+        }
+      }
+    ]);
+
+    let deletedCount = 0;
+
+    for (const doc of duplicates) {
+      // Sort uniqueIds to keep the oldest (assuming ObjectIds are chronologically sortable, which they are)
+      // or we can fetch them to be sure, but usually we just want to keep one.
+      // Let's keep the first one in the list (or sort if needed).
+      const idsToDelete = doc.uniqueIds.slice(1); // Keep the first one, delete the rest
+      
+      if (idsToDelete.length > 0) {
+        await Product.deleteMany({ _id: { $in: idsToDelete } });
+        deletedCount += idsToDelete.length;
+      }
+    }
+
+    res.status(200).json({ message: "Duplicate cleanup completed", deletedCount });
+
+  } catch (error) {
+    console.error("Error in deleteDuplicateProducts:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+export const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (product.images && product.images.length > 0) {
+      for (const imageUrl of product.images) {
+         try {
+             // Extract public ID from URL only if it's a cloudinary URL
+             if (imageUrl.includes("res.cloudinary.com")) {
+                 const publicId = imageUrl.split("/").pop().split(".")[0];
+                 await cloudinary.uploader.destroy(`products/${publicId}`);
+             }
+         } catch (error) {
+             console.error("Error deleting image from cloudinary:", error);
+         }
+      }
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteProduct controller", error.message);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };

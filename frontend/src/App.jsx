@@ -22,6 +22,7 @@ import AuthModal from './components/auth/AuthModal'
 import Profile from './pages/Profile'
 import Wishlist from "./pages/Wishlist";
 import OrderSuccess from "./pages/OrderSuccess";
+import BulkUploadProducts from "./pages/admin/BulkUploadProducts";
 
 function App() {
   const { authUser, checkAuth, checkingAuth } = useAuthStore();
@@ -56,6 +57,7 @@ function App() {
         <Route path="/admin" element={authUser?.role === "admin" ? <Admin /> : <Navigate to="/" />} />
         <Route path="/admin/add-product" element={authUser?.role === "admin" ? <AddProduct /> : <Navigate to="/" />} />
         <Route path="/admin/edit-product/:id" element={authUser?.role === "admin" ? <AddProduct /> : <Navigate to="/" />} />
+        <Route path="/admin/bulk-products" element={authUser?.role === "admin" ? <BulkUploadProducts /> : <Navigate to="/" />} />
         <Route path="/admin/messages" element={authUser?.role === "admin" ? <AdminContactMessages /> : <Navigate to="/" />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/" />} />
         <Route path="/wishlist" element={authUser ? <Wishlist /> : <Navigate to="/login" />} />

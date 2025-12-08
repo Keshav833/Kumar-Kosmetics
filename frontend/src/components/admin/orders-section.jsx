@@ -28,15 +28,15 @@ export default function OrdersSection({ orders = [], setOrders = () => {} }) {
 
       <div className="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
         <table className="w-full">
-          <thead className="border-b border-border bg-muted/50">
+          <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Order ID</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Customer</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Date</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Total</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Payment</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Status</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Action</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Order ID</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -48,33 +48,35 @@ export default function OrdersSection({ orders = [], setOrders = () => {} }) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="border-b border-border hover:bg-muted/50 transition-colors"
+                  className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors"
                 >
-                  <td className="px-6 py-4 text-sm font-medium text-primary">#{order._id.slice(-6)}</td>
-                  <td className="px-6 py-4 text-sm text-foreground">
+                  <td className="px-6 py-4 text-sm font-medium text-blue-600">#{order._id.slice(-6)}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
                       <div>
                           <p className="font-medium">{order.user?.name || "Unknown"}</p>
-                          <p className="text-xs text-muted-foreground">{order.user?.email}</p>
+                          <p className="text-xs text-gray-500">{order.user?.email}</p>
                       </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-foreground">₹{order.totalAmount}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">₹{order.totalAmount}</td>
                   <td className="px-6 py-4 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          order.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                          order.paymentStatus === 'Paid' 
+                            ? 'bg-green-50 text-green-700 border-green-100' 
+                            : 'bg-yellow-50 text-yellow-700 border-yellow-100'
                       }`}>
                           {order.paymentStatus}
                       </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || "bg-gray-100"}`}>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium border border-transparent ${statusColors[order.status] || "bg-gray-100 border-gray-200"}`}>
                       {order.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <button 
                       onClick={() => setSelectedOrder(order)}
-                      className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-colors"
+                      className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors border border-transparent hover:border-blue-100"
                       title="View Details"
                     >
                       <Eye className="w-5 h-5" />

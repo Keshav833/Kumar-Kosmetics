@@ -63,43 +63,43 @@ const productSchema = new mongoose.Schema(
         enum: ["Oily", "Dry", "Combination", "Sensitive", "Normal"],
       },
     ],
-    skinConcerns: [
-      {
-        type: String,
-        enum: [
-          "Acne",
-          "Dullness",
-          "Pigmentation",
-          "Anti-aging",
-          "Redness",
-          "Dark spots",
-          "Uneven skin tone",
-        ],
-      },
-    ],
+    skinConcerns: {
+      type: [String],
+      enum: [
+        "Acne",
+        "Pigmentation",
+        "Dullness",
+        "Redness",
+        "Dark spots",
+        "Fine lines",
+        "Dehydration",
+        "Texture",
+        "Enlarged pores",
+      ],
+    },
     ingredients: {
       type: [String], // Array of strings
       default: [],
     },
-    allergyLabels: [
-      {
-        type: String,
-        enum: [
-          "Paraben-free",
-          "Sulfate-free",
-          "Alcohol-free",
-          "Fragrance-free",
-          "Silicone-free",
-          "Non-comedogenic",
-        ],
-      },
-    ],
+    allergyLabels: {
+      type: [String],
+      enum: [
+        "Paraben-free",
+        "Sulfate-free",
+        "Alcohol-free",
+        "Fragrance-free",
+        "Essential-oil-free",
+        "Silicone-free",
+        "Non-comedogenic",
+      ],
+    },
     // Variants / Shades
     variants: [
       {
         name: { type: String, required: true },
         image: { type: String }, // Optional image for the variant
         stock: { type: Number, default: 0 },
+        price: { type: Number, default: 0 }, // Added price field
       },
     ],
   },

@@ -67,11 +67,11 @@ export default function CustomersSection({ customers = [] }) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-gray-50/80 transition-colors border-b border-gray-100"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg">
+                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg border border-blue-200">
                             {customer.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-4">
@@ -87,12 +87,12 @@ export default function CustomersSection({ customers = [] }) {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-col space-y-1">
                           <div className="flex items-center text-sm text-gray-600">
-                            <Mail className="w-3 h-3 mr-2 text-gray-400" />
+                            <Mail className="w-3.5 h-3.5 mr-2 text-gray-400" />
                             {customer.email}
                           </div>
                           {customer.phone && (
                               <div className="flex items-center text-sm text-gray-600">
-                              <Phone className="w-3 h-3 mr-2 text-gray-400" />
+                              <Phone className="w-3.5 h-3.5 mr-2 text-gray-400" />
                               {customer.phone}
                               </div>
                           )}
@@ -100,12 +100,12 @@ export default function CustomersSection({ customers = [] }) {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center text-sm text-gray-600">
-                          <Calendar className="w-3 h-3 mr-2 text-gray-400" />
+                          <Calendar className="w-3.5 h-3.5 mr-2 text-gray-400" />
                           {new Date(customer.createdAt).toLocaleDateString()}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">
+                        <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-100 capitalize">
                           {customer.role}
                         </span>
                       </td>

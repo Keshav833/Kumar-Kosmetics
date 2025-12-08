@@ -1,12 +1,22 @@
 import { Link, useNavigate } from "react-router-dom"
 import { ShoppingBag, Heart, User, LogOut } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuthStore } from "../../store/useAuthStore"
+import { useCartStore } from "../../store/useCartStore"
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { authUser, openAuthModal, logout } = useAuthStore()
+  const { cart, getCart } = useCartStore()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (authUser) {
+      getCart()
+    }
+  }, [authUser, getCart])
+
+  const cartItemCount = cart?.items?.length || 0
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border">
@@ -39,9 +49,11 @@ export default function Header() {
           </Link>
           <Link to="/cart" className="p-2 hover:bg-muted rounded-lg transition-colors relative">
             <ShoppingBag className="w-5 h-5 text-foreground" />
-            <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
-              0
-            </span>
+            {cartItemCount > 0 && (
+              <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
+                {cartItemCount}
+              </span>
+            )}
           </Link>
           {authUser ? (
             <div className="relative group">

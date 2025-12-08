@@ -1,15 +1,37 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Heart } from "lucide-react"
 import ProductQuickView from "@/components/product/product-quick-view"
 import { useWishlistStore } from "@/store/useWishlistStore"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useCartStore } from "@/store/useCartStore"
 import toast from "react-hot-toast"
 
 export default function ProductGrid({ viewType, filters, products = [] }) {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore()
   const { authUser, openAuthModal } = useAuthStore()
+  const { addToCart } = useCartStore()
+  const navigate = useNavigate()
+
+  const handleBuyNow = async (e, product) => {
+    e.preventDefault()
+    if (!authUser) {
+      openAuthModal({ type: "login" })
+      return
+    }
+    await addToCart(product._id || product.id, 1)
+    navigate("/cart")
+  }
+
+  const handleAddToCart = (e, product) => {
+    e.preventDefault()
+    if (!authUser) {
+      openAuthModal({ type: "login" })
+      return
+    }
+    addToCart(product._id || product.id, 1)
+  }
 
   const handleWishlistToggle = (e, productId) => {
     e.preventDefault() // Prevent navigation
@@ -50,7 +72,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
   if (viewType === "grid") {
     return (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product) => (
             <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
               <div className="bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
@@ -72,7 +94,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                 {/* Content */}
                 <div className="p-4">
                   <p className="text-xs text-primary font-medium mb-1">{product.category}</p>
-                  <h3 className="text-sm font-medium text-foreground mb-2">{product.name}</h3>
+                  <h3 className="text-sm font-medium text-foreground mb-2 truncate">{product.name}</h3>
 
                   {/* Rating */}
                   <div className="flex items-center gap-2 mb-3">
@@ -92,8 +114,17 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                   {/* Price and Button */}
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-foreground">₹{product.price}</span>
-                    <button className="bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity">
+                    <button 
+                      onClick={(e) => handleAddToCart(e, product)}
+                      className="bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity"
+                    >
                       Add to Cart
+                    </button>
+                    <button 
+                      onClick={(e) => handleBuyNow(e, product)}
+                      className="bg-secondary text-secondary-foreground px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity ml-2"
+                    >
+                      Buy Now
                     </button>
                   </div>
                 </div>
@@ -113,7 +144,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
       <div className="space-y-4">
         {filteredProducts.map((product) => (
           <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
-            <div className="bg-white rounded-2xl p-4 flex gap-4 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="bg-white rounded-2xl p-4 my-4 flex  gap-4 hover:shadow-lg transition-shadow cursor-pointer">
               <div className="w-24 h-24 bg-white rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-100">
                 <img
                   src={product.images?.[0] || product.image || "/placeholder.svg"}
@@ -125,7 +156,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
               <div className="flex-1 flex flex-col justify-between">
                 <div>
                   <p className="text-xs text-primary font-medium mb-1">{product.category}</p>
-                  <h3 className="font-medium text-foreground mb-2">{product.name}</h3>
+                  <h3 className="font-medium text-foreground mb-2 truncate">{product.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{(product.ingredients || []).join(", ")}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -144,8 +175,17 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                 </button>
                 <div className="text-right">
                   <p className="font-semibold text-foreground mb-2">₹{product.price} </p>
-                  <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90">
+                  <button 
+                    onClick={(e) => handleAddToCart(e, product)}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
+                  >
                     Add to Cart
+                  </button>
+                  <button 
+                    onClick={(e) => handleBuyNow(e, product)}
+                    className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 ml-2"
+                  >
+                    Buy Now
                   </button>
                 </div>
               </div>
