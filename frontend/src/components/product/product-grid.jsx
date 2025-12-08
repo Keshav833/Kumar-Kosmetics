@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { Link, useNavigate } from "react-router-dom"
 import { Heart } from "lucide-react"
 import ProductQuickView from "@/components/product/product-quick-view"
@@ -75,10 +76,14 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product) => (
             <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
-              <div className="bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
+              <motion.div 
+                layoutId={`product-card-${product._id || product.id}`}
+                className="bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer h-full flex flex-col"
+              >
                 {/* Image */}
-                <div className="relative h-48 bg-white overflow-hidden flex items-center justify-center">
-                  <img
+                <div className="relative h-48 bg-white overflow-hidden flex items-center justify-center p-4">
+                  <motion.img
+                    layoutId={`product-image-${product._id || product.id}`}
                     src={product.images?.[0] || product.image || "/placeholder.svg"}
                     alt={product.name}
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
@@ -122,7 +127,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </Link>
           ))}
         </div>

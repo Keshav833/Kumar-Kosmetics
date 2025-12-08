@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './store/useAuthStore'
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import { AnimatePresence } from 'framer-motion';
 
 // Pages
 import Home from './pages/Home'
@@ -24,23 +25,13 @@ import Wishlist from "./pages/Wishlist";
 import OrderSuccess from "./pages/OrderSuccess";
 import BulkUploadProducts from "./pages/admin/BulkUploadProducts";
 
-function App() {
-  const { authUser, checkAuth, checkingAuth } = useAuthStore();
-  console.log("Vercel API URL:", import.meta.env.VITE_API_URL);
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  if (checkingAuth) return (
-    <div className="flex items-center justify-center h-screen">
-      <Loader className="size-10 animate-spin" />
-    </div>
-  );
+function AnimatedRoutes() {
+  const location = useLocation();
+  const { authUser } = useAuthStore();
 
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/products" element={<Products />} />
@@ -63,6 +54,27 @@ function App() {
         <Route path="/wishlist" element={authUser ? <Wishlist /> : <Navigate to="/login" />} />
         <Route path="/order-success" element={<OrderSuccess />} />
       </Routes>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  const { checkAuth, checkingAuth } = useAuthStore();
+  console.log("Vercel API URL:", import.meta.env.VITE_API_URL);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (checkingAuth) return (
+    <div className="flex items-center justify-center h-screen">
+      <Loader className="size-10 animate-spin" />
+    </div>
+  );
+
+  return (
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AnimatedRoutes />
       <AuthModal />
       <Toaster />
     </BrowserRouter>

@@ -23,6 +23,7 @@ export const signup = async (req, res) => {
 			name: user.name,
 			email: user.email,
 			role: user.role,
+            avatar: user.avatar,
 		});
 	} catch (error) {
 		console.log("Error in signup controller", error.message);
@@ -59,6 +60,7 @@ export const login = async (req, res) => {
                 name: adminUser.name,
                 email: adminUser.email,
                 role: adminUser.role,
+                avatar: adminUser.avatar,
             });
         }
 
@@ -72,6 +74,7 @@ export const login = async (req, res) => {
 				name: user.name,
 				email: user.email,
 				role: user.role,
+                avatar: user.avatar,
 			});
 		} else {
 			res.status(400).json({ message: "Invalid email or password" });
@@ -119,6 +122,7 @@ export const googleLogin = async (req, res) => {
 				email,
 				password: await bcrypt.hash(Math.random().toString(36).slice(-8), 10), // Random password for google users
 				role: "customer",
+                avatar: picture,
 			});
 		}
 
@@ -129,6 +133,7 @@ export const googleLogin = async (req, res) => {
 			name: user.name,
 			email: user.email,
 			role: user.role,
+            avatar: user.avatar,
 		});
 	} catch (error) {
 		console.log("Error in googleLogin controller", error.message);

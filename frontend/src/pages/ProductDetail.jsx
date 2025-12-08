@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
+import { motion, AnimatePresence } from "framer-motion"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
-import { Heart, Share2, Loader, ChevronLeft, ChevronRight } from "lucide-react"
+import { Heart, Share2, Loader, ChevronLeft, ChevronRight, ShoppingBag, CreditCard } from "lucide-react"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useCartStore } from "@/store/useCartStore"
 import { useWishlistStore } from "@/store/useWishlistStore"
@@ -17,6 +18,7 @@ export default function ProductDetail() {
   const { authUser, openAuthModal } = useAuthStore()
   const { addToCart } = useCartStore()
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore()
+  const navigate = useNavigate()
   
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -97,6 +99,15 @@ export default function ProductDetail() {
     }
   }
 
+  const handleBuyNow = () => {
+    if (!authUser) {
+      openAuthModal({ type: "login" })
+      return
+    }
+    addToCart(product._id, quantity, selectedVariant)
+    navigate("/checkout")
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -128,7 +139,8 @@ export default function ProductDetail() {
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
               >
-                <img
+                <motion.img
+                  layoutId={`product-image-${product._id || product.id}`}
                   src={
                       hoveredImage ||
                       product.images?.[currentImageIndex] ||
@@ -177,8 +189,14 @@ export default function ProductDetail() {
             </div>
           </div>
 
+
+
           {/* Details */}
-          <div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <p className="text-sm text-primary font-medium mb-2">{product.category}</p>
             <h1 className="text-3xl font-light text-foreground mb-2">
               <span className="font-semibold">{product.name}</span>
@@ -262,25 +280,34 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="grid grid-cols-[1fr_auto_auto] gap-3">
                 <button 
                     onClick={handleAddToCart}
-                    className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                    className="flex items-center justify-center gap-2 bg-transparent border border-primary text-primary h-12 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                 >
+                  <ShoppingBag className="w-4 h-4" />
                   Add to Cart
                 </button>
                 <button 
                   onClick={handleWishlistToggle}
-                  className={`p-3 border border-border rounded-lg hover:bg-muted transition-colors ${isInWishlist(product._id) ? "bg-primary/10 border-primary" : ""}`}
+                  className={`h-12 w-12 flex items-center justify-center border border-border rounded-full hover:bg-muted transition-colors ${isInWishlist(product._id) ? "bg-primary/10 border-primary" : ""}`}
                 >
                   <Heart className={`w-5 h-5 ${isInWishlist(product._id) ? "fill-primary text-primary" : "text-primary"}`} />
                 </button>
-                <button className="p-3 border border-border rounded-lg hover:bg-muted transition-colors">
+                <button className="h-12 w-12 flex items-center justify-center border border-border rounded-full hover:bg-muted transition-colors">
                   <Share2 className="w-5 h-5 text-foreground" />
+                </button>
+                
+                <button 
+                    onClick={handleBuyNow}
+                    className="flex items-center justify-center gap-2 bg-transparent border border-amber-500 text-amber-500 h-12 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-amber-500 hover:text-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Buy Now
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Tabs */}

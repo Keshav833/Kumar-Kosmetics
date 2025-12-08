@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useSearchParams } from "react-router-dom"
 import axios from "../lib/axios"
 import Header from "../components/layout/header"
 import Footer from "../components/layout/footer"
@@ -7,16 +8,21 @@ import ProductGrid from "../components/product/product-grid"
 import { Grid, List, Loader, Search, X } from "lucide-react"
 
 export default function Products() {
+  const [searchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [viewType, setViewType] = useState("grid")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "")
   const [filters, setFilters] = useState({
     skinType: [],
     category: [],
     priceRange: [0, 5000],
     concern: [],
   })
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get("q") || "")
+  }, [searchParams])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -63,33 +69,13 @@ export default function Products() {
           {/* Main Content */}
           <div className="flex-1">
             {/* Toolbar */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center bg-opacity-80 backdrop-blur-md sticky top-20 z-10 transition-all">
+            <div className=" p-4 mb-8 flex flex-col sm:flex-row gap-4 justify-end items-center transition-all">
               
-              {/* Search Bar */}
-              <div className="relative w-full sm:max-w-md group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search products, brands, categories..."
-                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-all duration-300"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    <X className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-pointer" />
-                  </button>
-                )}
-              </div>
+              {/* Search Bar Removed */}
 
               {/* View Controls & Count */}
               <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                <span className="text-sm text-gray-500 font-medium whitespace-nowrap hidden sm:block">
+                <span className="text-sm  text-gray-500 font-medium whitespace-nowrap hidden sm:block">
                   {searchedProducts.length} Results
                 </span>
 
