@@ -118,13 +118,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                       onClick={(e) => handleAddToCart(e, product)}
                       className="bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity"
                     >
-                      Add to Cart
-                    </button>
-                    <button 
-                      onClick={(e) => handleBuyNow(e, product)}
-                      className="bg-secondary text-secondary-foreground px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity ml-2"
-                    >
-                      Buy Now
+                      Add
                     </button>
                   </div>
                 </div>
@@ -179,13 +173,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
                     onClick={(e) => handleAddToCart(e, product)}
                     className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
                   >
-                    Add to Cart
-                  </button>
-                  <button 
-                    onClick={(e) => handleBuyNow(e, product)}
-                    className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 ml-2"
-                  >
-                    Buy Now
+                    Add
                   </button>
                 </div>
               </div>
