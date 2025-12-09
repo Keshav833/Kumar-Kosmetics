@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { ShoppingBag, Heart, User, LogOut, Search, X } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useAuthStore } from "../../store/useAuthStore"
 import { useCartStore } from "../../store/useCartStore"
 
@@ -10,6 +10,13 @@ export default function Header() {
   const [isVisible, setIsVisible] = useState(true)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+        searchInputRef.current.focus();
+    }
+  }, [isSearchOpen]);
 
   const { authUser, openAuthModal, logout } = useAuthStore()
   const { cart, getCart } = useCartStore()
@@ -30,7 +37,7 @@ export default function Header() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       const heroHeight = window.innerHeight
-      const threshold = heroHeight * 0.8 // 80% screen height
+      const threshold = heroHeight * 0.1
 
       // Background Logic
       if (currentScrollY > threshold) {
@@ -62,15 +69,20 @@ export default function Header() {
     }
   }
 
+  const isTransparentNav = location.pathname === "/" || location.pathname === "/products"
+  
+  const textColorClass = "text-foreground hover:text-primary"
+  const iconColorClass = "text-foreground"
+
   const cartItemCount = cart?.items?.length || 0
 
   return (
     <>
     <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 transform ${
+      className={`fixed top-0 w-full z-50 transition-all duration-500 ease-in-out transform ${
         isVisible ? "translate-y-0" : "-translate-y-full"
       } ${
-        isScrolled || !isHome || isSearchOpen
+        isScrolled || !isTransparentNav || isSearchOpen
           ? "bg-white/80 backdrop-blur-md shadow-md border-b border-border" 
           : "bg-transparent backdrop-blur-none shadow-none border-none"
       }`}
@@ -83,6 +95,7 @@ export default function Header() {
            <form onSubmit={handleSearchSubmit} className={"flex items-center gap-4 transition-all duration-1000 ease-in-out transform origin-center " + (isSearchOpen ? "w-full max-w-7xl opacity-100 scale-100" : "w-[60%] opacity-80 scale-95")}>
               <Search className="w-5 h-5 text-gray-600" />
               <input 
+                ref={searchInputRef}
                 autoFocus={isSearchOpen}
                 type="text" 
                 placeholder="Search..." 
@@ -98,36 +111,40 @@ export default function Header() {
 
         {/* Logo */}
         <Link to="/" className={`flex items-center gap-2 transition-opacity duration-300 ${isSearchOpen ? "opacity-0" : "opacity-100"}`}>
-          <img src="/kumarKosmetics.png" alt="Kumar Kosmetics" className="h-12 w-auto object-contain" />
+          <img 
+            src="/kumarKosmetics.png" 
+            alt="Kumar Kosmetics" 
+            className="h-12 w-auto object-contain" 
+          />
         </Link>
         
         {/* Navigation - Desktop */}
         <nav className={`hidden md:flex items-center gap-8 transition-opacity duration-300 ${isSearchOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-          <Link to="/products" className="text-sm text-foreground hover:text-primary transition-colors font-medium">
+          <Link to="/products" className={`text-sm transition-colors font-medium ${textColorClass}`}>
             Products
           </Link>
-          <Link to="/skin-analyzer" className="text-sm text-foreground hover:text-primary transition-colors font-medium">
+          <Link to="/skin-analyzer" className={`text-sm transition-colors font-medium ${textColorClass}`}>
             Skin Analyzer
           </Link>
-          <Link to="/about" className="text-sm text-foreground hover:text-primary transition-colors font-medium">
+          <Link to="/about" className={`text-sm transition-colors font-medium ${textColorClass}`}>
             About
           </Link>
-          <Link to="/contact" className="text-sm text-foreground hover:text-primary transition-colors font-medium">
+          <Link to="/contact" className={`text-sm transition-colors font-medium ${textColorClass}`}>
             Contact
           </Link>
         </nav>
 
         {/* Icons */}
         <div className={`flex items-center gap-4 transition-opacity duration-300 ${isSearchOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-          <button onClick={() => setIsSearchOpen(true)} className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <Search className="w-5 h-5 text-foreground" />
+          <button onClick={() => setIsSearchOpen(true)} className="p-2 rounded-lg transition-colors hover:bg-muted">
+            <Search className={`w-5 h-5 ${iconColorClass}`} />
           </button>
           
-          <Link to="/wishlist" className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <Heart className="w-5 h-5 text-foreground" />
+          <Link to="/wishlist" className="p-2 rounded-lg transition-colors hover:bg-muted">
+            <Heart className={`w-5 h-5 ${iconColorClass}`} />
           </Link>
-          <Link to="/cart" className="p-2 hover:bg-muted rounded-lg transition-colors relative">
-            <ShoppingBag className="w-5 h-5 text-foreground" />
+          <Link to="/cart" className="p-2 rounded-lg transition-colors relative hover:bg-muted">
+            <ShoppingBag className={`w-5 h-5 ${iconColorClass}`} />
             {cartItemCount > 0 && (
               <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-white text-xs rounded-full flex items-center justify-center">
                 {cartItemCount}
@@ -136,15 +153,14 @@ export default function Header() {
           </Link>
           {authUser ? (
             <div className="relative group">
-              <button className="flex items-center gap-2 p-1 hover:bg-muted rounded-full transition-colors border border-transparent hover:border-border">
+              <button className="flex items-center gap-2 p-1 rounded-full transition-colors border border-transparent  hover:bg-muted hover:border-border">
                 {authUser.avatar ? (
                   <img src={authUser.avatar} alt={authUser.name} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
                 ) : (
                   <div className="p-1">
-                    <User className="w-5 h-5 text-foreground" />
+                    <User className={`w-5 h-5 ${iconColorClass}`} />
                   </div>
                 )}
-                <span className="hidden md:block text-sm font-medium text-foreground pr-2">{authUser.name}</span>
               </button>
               
               {/* Dropdown Menu */}
@@ -177,14 +193,14 @@ export default function Header() {
               </div>
             </div>
           ) : (
-            <Link to="/login" className="p-2 hover:bg-muted rounded-lg transition-colors">
-              <User className="w-5 h-5 text-foreground" />
+            <Link to="/login" className="p-2 rounded-lg transition-colors hover:bg-muted">
+              <User className={`w-5 h-5 ${iconColorClass}`} />
             </Link>
           )}
         </div>
       </div>
     </header>
-    {!isHome && <div className="h-20" />}
+    {!isTransparentNav && <div className="h-20" />}
     </>
   )
 }

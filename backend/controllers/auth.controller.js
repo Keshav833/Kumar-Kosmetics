@@ -114,6 +114,12 @@ export const googleLogin = async (req, res) => {
 		});
 		const { name, email, picture } = ticket.getPayload();
 
+        // Extract Google profile picture and upgrade quality
+        let googleAvatar = picture || null;
+        if (googleAvatar && googleAvatar.includes("s96-c")) {
+            googleAvatar = googleAvatar.replace("s96-c", "s256-c");
+        }
+
 		let user = await User.findOne({ email });
 
 		if (!user) {
@@ -122,9 +128,15 @@ export const googleLogin = async (req, res) => {
 				email,
 				password: await bcrypt.hash(Math.random().toString(36).slice(-8), 10), // Random password for google users
 				role: "customer",
-                avatar: picture,
+                avatar: googleAvatar || "",
 			});
-		}
+		} else {
+            // If user exists, update avatar only if missing
+            if (!user.avatar && googleAvatar) {
+                user.avatar = googleAvatar;
+                await user.save();
+            }
+        }
 
 		generateTokenAndSetCookie(user._id, res);
 
