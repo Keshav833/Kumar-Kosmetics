@@ -70,7 +70,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <h2 className="font-semibold text-foreground">{authUser?.name || "User"}</h2>
-                  <p className="text-sm text-muted-foreground">{authUser?.email}</p>
+                  <p className="text-sm text-muted-foreground w-1/2">{authUser?.email}</p>
                 </div>
               </div>
 

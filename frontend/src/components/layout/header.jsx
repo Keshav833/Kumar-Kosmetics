@@ -101,7 +101,13 @@ export default function Header() {
                 placeholder="Search..." 
                 className="flex-1 bg-transparent border-b border-gray-100 focus:border-primary/50 outline-none text-xl font-light text-foreground placeholder-gray-300 py-2 transition-all"
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchValue(value);
+                  if (location.pathname === "/products" && isSearchOpen) {
+                     navigate(`/products?q=${encodeURIComponent(value.trim())}`, { replace: true });
+                  }
+                }}
               />
               <button type="button" onClick={() => { setIsSearchOpen(false); setSearchValue(""); }} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
                 <X className="w-5 h-5 text-gray-400 hover:text-foreground transition-colors" />

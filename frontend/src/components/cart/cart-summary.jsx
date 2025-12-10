@@ -1,10 +1,15 @@
 import { Link } from "react-router-dom"
 
 export default function CartSummary({ items, onCheckout }) {
-  const subtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0)
-  const tax = Math.round(subtotal * 0.18)
-  const shipping = subtotal > 1000 ? 0 : 100
-  const total = subtotal + tax + shipping
+  const inclusiveSubtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0)
+  const tax = Math.round(inclusiveSubtotal - (inclusiveSubtotal / 1.18))
+  const subtotal = inclusiveSubtotal - tax
+  
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
+  const standardShipping = totalQuantity * 50
+  const shipping = inclusiveSubtotal > 1500 ? 0 : standardShipping
+  
+  const total = inclusiveSubtotal + shipping
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-border h-fit sticky top-24">
@@ -28,11 +33,16 @@ export default function CartSummary({ items, onCheckout }) {
         </div>
       </div>
 
-      {shipping === 0 && (
+      {shipping === 0 ? (
         <div className="bg-primary/10 rounded-lg p-3 mt-4 mb-4 text-xs text-primary font-medium">
-          Free shipping! Order over ₹1000
+          Free shipping applied!
+        </div>
+      ) : (
+        <div className="bg-gray-50 rounded-lg p-3 mt-4 mb-4 text-xs text-muted-foreground font-medium">
+          Add items worth ₹{1500 - inclusiveSubtotal} more for free shipping
         </div>
       )}
+
 
       {/* Total */}
       <div className="flex justify-between mb-6 pt-4">

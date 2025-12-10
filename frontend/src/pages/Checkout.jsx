@@ -35,13 +35,16 @@ export default function Checkout() {
         price: item.product.price,
         id: item._id
     })) || [];
-	const subtotal = cart?.subTotal || 0; // Assuming backend calculates this or we calculate it here
-    // If backend doesn't send subTotal, calculate it:
-    const calculatedSubtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    // Calculate inclusive total from items
+	const calculatedInclusiveSubtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     
-	const tax = Math.round(calculatedSubtotal * 0.18);
-	const shipping = 100;
-	const total = calculatedSubtotal + tax + shipping;
+    // Reverse GST Calculation: Product Price includes 18% GST
+	const tax = Math.round(calculatedInclusiveSubtotal - (calculatedInclusiveSubtotal / 1.18));
+    const subtotal = calculatedInclusiveSubtotal - tax; // Base Price
+    
+    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+	const shipping = calculatedInclusiveSubtotal > 1500 ? 0 : totalQuantity * 50;
+	const total = calculatedInclusiveSubtotal + shipping;
 
 	const handleFormSubmit = (data) => {
 		setOrderData(data);
@@ -99,7 +102,7 @@ export default function Checkout() {
 						<aside className="lg:col-span-1">
 							<OrderReview
 								items={cartItems}
-								subtotal={calculatedSubtotal}
+								subtotal={subtotal}
 								tax={tax}
 								shipping={shipping}
 								total={total}
@@ -122,7 +125,7 @@ export default function Checkout() {
 						<aside className="lg:col-span-1">
 							<OrderReview
 								items={cartItems}
-								subtotal={calculatedSubtotal}
+								subtotal={subtotal}
 								tax={tax}
 								shipping={shipping}
 								total={total}

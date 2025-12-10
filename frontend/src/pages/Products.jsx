@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import axios from "../lib/axios"
 import Header from "../components/layout/header"
@@ -25,6 +25,18 @@ export default function Products() {
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "")
   }, [searchParams])
+
+  const productsSectionRef = useRef(null)
+
+  useEffect(() => {
+    if (searchQuery && productsSectionRef.current) {
+      // Scroll to products if we have a query and we are above the section
+      const offsetTop = productsSectionRef.current.offsetTop - 100; // 100px buffer for header
+      if (window.scrollY < offsetTop) {
+        window.scrollTo({ top: offsetTop, behavior: 'smooth' })
+      }
+    }
+  }, [searchQuery])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -66,19 +78,30 @@ export default function Products() {
 
         {/* Text Content Overlay */}
         <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24">
+          <style>{`
+            @keyframes slideInLeft {
+              from { opacity: 0; transform: translateX(-100px); }
+              to { opacity: 1; transform: translateX(0); }
+            }
+            .animate-slide-in-left {
+              animation: slideInLeft 1s ease-out forwards;
+              opacity: 0; /* Ensures it starts invisible */
+            }
+          `}</style>
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl text-black mb-6 mt-10  animate-fade-in-up" style={{ fontFamily: "'Neue Haas Grotesk', 'Helvetica Neue', Arial, sans-serif" }}>
-              <span className="block drop-shadow-md">Clean</span>
-              <span className="block drop-shadow-md">Conscious</span>
-              <span className="block drop-shadow-md">Clinical</span>
-              <span className="block font-thin opacity-90">Skincare</span>
+            <h1 className="text-5xl md:text-6xl  lg:text-7xl text-black mb-6 mt-10  " >
+              <span className="block drop-shadow-md animate-slide-in-left">Clean</span>
+              <span className="block drop-shadow-md animate-slide-in-left">Conscious</span>
+              <span className="block drop-shadow-md animate-slide-in-left">Clinical</span>
+              <span className="block font-thin opacity-90 animate-slide-in-left">Skincare</span>
             </h1>
-            <p className="text-xl md:text-2xl font-sans w-1/2 text-black leading-relaxed max-w-2xl drop-shadow-sm">
-              <span className="font-thin text-gray-500 w-1/2" style={{ fontFamily: "'Neue Haas Grotesk', 'Helvetica Neue', Arial, sans-serif" }}>
+            <p className="text-xl md:text-2xl font-sans w-1/2 text-black leading-relaxed max-w-2xl drop-shadow-sm animate-slide-in-left" style={{ animationDelay: '0.3s' }}>
+              <span className="font-extralight text-gray-600 w-1/2">
                 Unreservedly honest products that work, be kind to skin and the planet
               </span>
-              <span className="ml-2 text-gray-500 backdrop-blur-sm px-2 py-1 rounded-md" style={{ fontFamily: "Georgia, 'Playfair Display', serif", fontStyle: 'italic' }}>
-                – no exceptions!
+            
+              <span className="ml-2 px-2 py-1 text-3xl rounded-md italic font-['Bodoni_Moda'] text-gray-700" >
+                – no exceptions!  
               </span>
             </p>
           </div>
@@ -96,7 +119,7 @@ export default function Products() {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1" ref={productsSectionRef}>
             {/* Toolbar */}
             <div className=" p-4 mb-8 flex flex-col sm:flex-row gap-4 justify-end items-center transition-all">
               
