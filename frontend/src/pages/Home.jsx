@@ -6,16 +6,18 @@ import FeaturedProducts from "@/components/product/featured-products"
 import BrandStory from "@/components/home/brand-story"
 import Testimonials from "@/components/home/testimonials"
 import Footer from "@/components/layout/footer"
+import BenefitsSection from "@/components/home/benefits-section"
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <Header />
       <HeroSection />
-      <SearchBar />
-      <SkinTypeRecommendation />
+      {/* <SearchBar /> */}
       <FeaturedProducts />
-      <BrandStory />
+      <BenefitsSection />
+      {/* <SkinTypeRecommendation /> */}
+      {/* <BrandStory /> */}
       <Testimonials />
       <Footer />
     </main>

@@ -121,7 +121,8 @@ export default function Products() {
           {/* Main Content */}
           <div className="flex-1" ref={productsSectionRef}>
             {/* Toolbar */}
-            <div className=" p-4 mb-8 flex flex-col sm:flex-row gap-4 justify-end items-center transition-all">
+            <div className="p-4 mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center transition-all">
+              <h2 className="text-4xl font-bold text-gray-700 tracking-tight">Products</h2>
               
               {/* View Controls & Count */}
               <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">

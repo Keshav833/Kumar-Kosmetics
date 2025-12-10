@@ -100,15 +100,16 @@ export const getAllProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
     
-    // Increment view count
-    product.views = (product.views || 0) + 1;
-    await product.save();
-
     res.json(product);
   } catch (error) {
     if (error.name === "CastError") {

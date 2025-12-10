@@ -27,8 +27,8 @@ export default function Testimonials() {
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-light text-foreground mb-3">
+      <div className="text-center  mb-12">
+        <h2 className="text-5xl font-light text-foreground mb-3">
           Loved by <span className="font-semibold">Thousands</span>
         </h2>
         <p className="text-muted-foreground">Real testimonials from our happy customers</p>
@@ -36,7 +36,7 @@ export default function Testimonials() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {testimonials.map((testimonial, idx) => (
-          <div key={idx} className="bg-white rounded-2xl p-6 border border-border hover:shadow-lg transition-shadow">
+          <div key={idx} className="bg-gray-200 rounded-2xl p-6 border border-border hover:shadow-lg transition-shadow">
             <p className="text-muted-foreground mb-6 italic">"{testimonial.content}"</p>
 
             <div className="flex items-center gap-3">
