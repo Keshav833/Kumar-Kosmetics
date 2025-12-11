@@ -28,7 +28,10 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
+          'ui-vendor': ['lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge', '@radix-ui/react-dialog', '@radix-ui/react-slot'],
+          'charts': ['recharts'],
+          'animation': ['framer-motion', 'gsap'],
+          'utils': ['axios', 'date-fns'],
         },
       },
     },
