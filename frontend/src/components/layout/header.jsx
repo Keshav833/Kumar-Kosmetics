@@ -39,7 +39,7 @@ export default function Header() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       const heroHeight = window.innerHeight
-      const threshold = heroHeight * 0.2
+      const threshold = heroHeight * 0.1
 
       // Background Logic
       if (currentScrollY > threshold) {
@@ -98,7 +98,7 @@ export default function Header() {
     },
     {
       icon: (
-        <div className="relative flex items-center justify-center w-full h-full">
+        <div className="relative flex items-center justify-center">
           <ShoppingBag className={`w-5 h-5 ${iconColorClass}`} />
           {cartItemCount > 0 && (
             <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary text-white text-[10px] rounded-full flex items-center justify-center">

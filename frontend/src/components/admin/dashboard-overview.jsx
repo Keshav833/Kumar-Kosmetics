@@ -180,22 +180,25 @@ export default function DashboardOverview({ products = [], orders = [], customer
                    const pid = item.product || item._id || item.name 
                    
                    // Find current product details to get real-time views
-                   const currentProduct = products.find(p => p._id === pid) || {}
+                   const currentProduct = products.find(p => p._id === pid)
+
+                   // Skip if product is deleted (not found in current products list)
+                   if (!currentProduct) return
 
                    if (!productSales[pid]) {
                        productSales[pid] = {
-                           name: item.name,
+                           name: currentProduct.name || item.name,
                            sales: 0,
                            revenue: 0,
-                           image: item.image,
-                           price: item.price,
-                           category: item.category,
+                           image: currentProduct.images?.[0] || item.image,
+                           price: currentProduct.price || item.price,
+                           category: currentProduct.category || item.category,
                            views: currentProduct.views || 0 // Use real views
                        }
                    }
                    productSales[pid].sales += (item.quantity || 1)
                    productSales[pid].revenue += (item.price * (item.quantity || 1))
-                   // Ensure views are updated if product was found later
+                   // Ensure views are updated
                    if(currentProduct.views) productSales[pid].views = currentProduct.views
                 })
             }

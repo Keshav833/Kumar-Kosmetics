@@ -99,13 +99,13 @@ export default function ProductDetail() {
     }
   }
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!authUser) {
       openAuthModal({ type: "login" })
       return
     }
-    addToCart(product._id, quantity, selectedVariant)
-    navigate("/checkout")
+    await addToCart(product._id, quantity, selectedVariant)
+    navigate("/cart")
   }
 
   if (loading) {
