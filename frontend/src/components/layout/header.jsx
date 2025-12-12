@@ -184,13 +184,12 @@ export default function Header() {
   return (
     <>
     <header 
-      className={`fixed top-0 w-full h-24 z-50 transition-all duration-500 ease-in-out transform ${
+      className={`fixed top-0 w-full h-20 z-50 transition-all duration-500 ease-in-out transform ${
         isVisible ? "translate-y-0" : "-translate-y-full"
-      }`}
-      style={{ pointerEvents: 'none' }}
+      } ${isScrolled ? "bg-white/80 dark:bg-black/80 backdrop-blur-md shadow-sm pointer-events-auto" : "bg-transparent pointer-events-none"}`}
     >
         {/* Search Overlay */}
-        <div className={`absolute inset-0 bg-white/95 backdrop-blur-xl z-50 flex items-center justify-center px-4 transition-all duration-500 ease-out pointer-events-auto ${isSearchOpen ? "opacity-100 visible translate-y-0 h-24" : "opacity-0 invisible -translate-y-4 h-0"}`}>
+        <div className={`absolute inset-0 bg-white/35 backdrop-blur-2xl z-50 flex items-center justify-center px-4 transition-all duration-500 ease-out pointer-events-auto ${isSearchOpen ? "opacity-100 visible translate-y-0 h-20" : "opacity-0 invisible -translate-y-4 h-0"}`}>
            <form onSubmit={handleSearchSubmit} className={"flex items-center gap-4 transition-all duration-1000 ease-in-out transform origin-center " + (isSearchOpen ? "w-full max-w-7xl opacity-100 scale-100" : "w-[60%] opacity-80 scale-95")}>
               <Search className="w-5 h-5 text-gray-600" />
               <input 
@@ -227,7 +226,7 @@ export default function Header() {
                 hoveredPillTextColor="#fff"
                 hoverCircleColor="#000"
                 initialLoadAnimation={false}
-                className="!absolute !top-4 !w-full"
+                className="!absolute !top-1/2 !-translate-y-1/2 !w-full"
             />
         </div>
     </header>
