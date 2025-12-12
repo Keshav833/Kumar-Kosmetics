@@ -14,6 +14,8 @@ import reviewRoutes from "./routes/review.route.js";
 import contactRoutes from "./routes/contact.route.js";
 import paymentRoutes from "./routes/payment.route.js";
 import orderRoutes from "./routes/order.route.js";
+import skinAnalysisRoutes from "./routes/skinAnalysis.route.js";
+import adminSkinAnalyzerRoutes from "./routes/adminSkinAnalyzer.route.js";
 
 import Order from "./models/Order.model.js";
 import { connectDB } from "./lib/db.js";
@@ -51,6 +53,8 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/skin-analysis", skinAnalysisRoutes);
+app.use("/api/admin/skin-analyzer", adminSkinAnalyzerRoutes);
 
 // Health Check
 app.get("/", (req, res) => {

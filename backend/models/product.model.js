@@ -93,6 +93,14 @@ const productSchema = new mongoose.Schema(
         "Non-comedogenic",
       ],
     },
+    activeIngredients: {
+      type: [String],
+      default: [],
+    },
+    warnings: {
+      type: [String],
+      default: [],
+    },
     // Variants / Shades
     variants: [
       {

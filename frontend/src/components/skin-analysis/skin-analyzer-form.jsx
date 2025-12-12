@@ -1,100 +1,157 @@
 "use client"
 import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Check, ChevronRight, ChevronLeft, AlertCircle } from "lucide-react"
 
 export default function SkinAnalyzerForm({ onAnalysisComplete }) {
   const [step, setStep] = useState(1)
-  const [analysis, setAnalysis] = useState({
+  const [answers, setAnswers] = useState({
     skinType: "",
     concerns: [],
     allergies: [],
+    sleep: "",
+    outdoors: false,
+    sunscreen: false,
+    currentRoutine: [],
+    reactions: false,
+    medications: "",
+    goal: "",
   })
 
-  const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"]
-  const concerns = ["Acne", "Dullness", "Pigmentation", "Anti-aging", "Redness", "Dark spots", "Uneven skin tone"]
-  const allergies = ["Fragrance-free", "Paraben-free", "Sulfate-free", "Silicone-free", "Alcohol-free"]
-
-  const toggleConcern = (concern) => {
-    setAnalysis((prev) => ({
-      ...prev,
-      concerns: prev.concerns.includes(concern)
-        ? prev.concerns.filter((c) => c !== concern)
-        : [...prev.concerns, concern],
-    }))
-  }
-
-  const toggleAllergy = (allergy) => {
-    setAnalysis((prev) => ({
-      ...prev,
-      allergies: prev.allergies.includes(allergy)
-        ? prev.allergies.filter((a) => a !== allergy)
-        : [...prev.allergies, allergy],
-    }))
-  }
+  const totalSteps = 6
 
   const handleNext = () => {
-    if (step === 1 && !analysis.skinType) return
-    if (step < 3) setStep(step + 1)
+    if (step < totalSteps) setStep(step + 1)
+    else onAnalysisComplete(answers)
   }
 
-  const handleComplete = () => {
-    onAnalysisComplete(analysis)
+  const handleBack = () => {
+    if (step > 1) setStep(step - 1)
   }
 
-  return (
-    <section className="max-w-2xl mx-auto px-4 py-16">
-      {/* Progress */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-light text-foreground">
-            Find Your <span className="font-semibold">Perfect Products</span>
-          </h1>
-          <span className="text-sm text-muted-foreground">Step {step} of 3</span>
-        </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-primary transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
-        </div>
-      </div>
+  const updateAnswer = (field, value) => {
+    setAnswers(prev => ({ ...prev, [field]: value }))
+  }
 
-      <div className="bg-white rounded-2xl p-8 border border-border">
-        {/* Step 1: Skin Type */}
-        {step === 1 && (
-          <div className="slide-up">
-            <h2 className="text-2xl font-semibold text-foreground mb-6">What's your skin type?</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+  const toggleArrayAnswer = (field, value) => {
+    setAnswers(prev => {
+      const current = prev[field]
+      const updated = current.includes(value)
+        ? current.filter(item => item !== value)
+        : [...current, value]
+      return { ...prev, [field]: updated }
+    })
+  }
+
+  // Options with Unsplash Images
+  const skinTypes = [
+    { 
+      id: "Oily", 
+      label: "Oily", 
+      desc: "Shiny T-zone, enlarged pores",
+      image: "https://images.unsplash.com/photo-1508759073847-9ca702bd4d2b?q=80&w=600&auto=format&fit=crop"
+    },
+    { 
+      id: "Dry", 
+      label: "Dry", 
+      desc: "Tight, flaky, rough texture",
+      image: "https://images.unsplash.com/photo-1508759073847-9ca702bd4d2b?q=80&w=600&auto=format&fit=crop"
+    },
+    { 
+      id: "Combination", 
+      label: "Combination", 
+      desc: "Oily T-zone, dry cheeks",
+      image: "https://images.unsplash.com/photo-1508759073847-9ca702bd4d2b?q=80&w=600&auto=format&fit=crop"
+    },
+    { 
+      id: "Normal", 
+      label: "Normal", 
+      desc: "Balanced, few imperfections",
+      image: "https://images.unsplash.com/photo-1508759073847-9ca702bd4d2b?q=80&w=600&auto=format&fit=crop"
+    },
+    { 
+      id: "Sensitive", 
+      label: "Sensitive", 
+      desc: "Redness, irritation prone",
+      image: "https://images.unsplash.com/photo-1508759073847-9ca702bd4d2b?q=80&w=600&auto=format&fit=crop"
+    },
+  ]
+
+  const concerns = [
+    "Acne", "Breakouts", "Blackheads", "Large pores",
+    "Pigmentation", "Dark spots", "Uneven tone",
+    "Dullness", "Uneven texture",
+    "Fine lines", "Wrinkles", "Loss of firmness",
+    "Dryness", "Flakiness",
+    "Redness", "Rosacea", "Sensitivity",
+    "Dark circles", "Puffiness"
+  ]
+
+  const allergies = [
+    "Parabens", "Sulfates", "Fragrance", "Alcohol", "Silicones", "Essential-oils"
+  ]
+
+  const routineItems = [
+    "Vitamin C", "Retinol", "AHAs/BHAs", "Niacinamide", "Hyaluronic Acid", "None"
+  ]
+
+  const goals = [
+    "Hydration", "Glow & Brightening", "Anti-ageing", "Reduce Breakouts", "Even Tone"
+  ]
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-foreground">How would you describe your skin type?</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {skinTypes.map((type) => (
                 <button
-                  key={type}
-                  onClick={() => setAnalysis((prev) => ({ ...prev, skinType: type }))}
-                  className={`p-4 rounded-lg font-medium transition-all ${
-                    analysis.skinType === type
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground hover:bg-border"
+                  key={type.id}
+                  onClick={() => updateAnswer("skinType", type.id)}
+                  className={`group relative p-6 rounded-xl border-2 text-left transition-all overflow-hidden min-h-[160px] flex flex-col justify-end ${
+                    answers.skinType === type.id
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "border-border hover:border-primary/50"
                   }`}
                 >
-                  {type}
+                  {/* Background Image on Hover/Active */}
+                  <div 
+                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${
+                      answers.skinType === type.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}
+                    style={{ backgroundImage: `url(${type.image})` }}
+                  />
+                  
+                  {/* Gradient Overlay for text readability */}
+                  <div className={`absolute inset-0 bg-gradient-to-t from-white/90 via-white/40 to-transparent transition-opacity duration-300 ${
+                     answers.skinType === type.id || "group-hover:opacity-100"
+                  }`} />
+
+                  <div className="relative z-10">
+                    <div className="font-semibold text-lg mb-1">{type.label}</div>
+                    <div className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{type.desc}</div>
+                  </div>
                 </button>
               ))}
             </div>
-            <p className="text-sm text-muted-foreground mt-6">
-              {analysis.skinType && getSkintypeDescription(analysis.skinType)}
-            </p>
           </div>
-        )}
-
-        {/* Step 2: Concerns */}
-        {step === 2 && (
-          <div className="slide-up">
-            <h2 className="text-2xl font-semibold text-foreground mb-2">What are your main concerns?</h2>
-            <p className="text-muted-foreground mb-6">Select all that apply</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        )
+      case 2:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-foreground">What are your main skin concerns?</h2>
+            <p className="text-muted-foreground">Select all that apply</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {concerns.map((concern) => (
                 <button
                   key={concern}
-                  onClick={() => toggleConcern(concern)}
-                  className={`p-4 rounded-lg font-medium transition-all border-2 ${
-                    analysis.concerns.includes(concern)
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-foreground hover:border-primary"
+                  onClick={() => toggleArrayAnswer("concerns", concern)}
+                  className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                    answers.concerns.includes(concern)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background text-foreground border-border hover:border-primary"
                   }`}
                 >
                   {concern}
@@ -102,85 +159,230 @@ export default function SkinAnalyzerForm({ onAnalysisComplete }) {
               ))}
             </div>
           </div>
-        )}
-
-        {/* Step 3: Allergies/Preferences */}
-        {step === 3 && (
-          <div className="slide-up">
-            <h2 className="text-2xl font-semibold text-foreground mb-2">Any preferences?</h2>
-            <p className="text-muted-foreground mb-6">Select attributes you look for</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+        )
+      case 3:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-foreground">Any allergies or sensitivities?</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {allergies.map((allergy) => (
                 <button
                   key={allergy}
-                  onClick={() => toggleAllergy(allergy)}
-                  className={`p-4 rounded-lg font-medium transition-all border-2 ${
-                    analysis.allergies.includes(allergy)
-                      ? "border-secondary bg-secondary/10 text-secondary"
-                      : "border-border text-foreground hover:border-secondary"
+                  onClick={() => toggleArrayAnswer("allergies", allergy)}
+                  className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                    answers.allergies.includes(allergy)
+                      ? "bg-red-100 text-red-700 border-red-500"
+                      : "bg-background text-foreground border-border hover:border-red-300"
                   }`}
                 >
                   {allergy}
                 </button>
               ))}
-            </div>
-
-            <div className="bg-accent/10 rounded-lg p-4 mb-6">
-              <p className="text-sm text-foreground">
-                <span className="font-semibold">Your Profile:</span> {analysis.skinType} skin |{" "}
-                {analysis.concerns.length > 0 ? analysis.concerns.join(", ") : "No concerns selected"}
-              </p>
+              <button
+                onClick={() => updateAnswer("allergies", [])}
+                className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                  answers.allergies.length === 0
+                    ? "bg-green-100 text-green-700 border-green-500"
+                    : "bg-background text-foreground border-border hover:border-green-300"
+                }`}
+              >
+                None
+              </button>
             </div>
           </div>
-        )}
+        )
+      case 4:
+        return (
+          <div className="space-y-8">
+            <h2 className="text-2xl font-bold text-foreground">Lifestyle Check</h2>
+            
+            <div className="space-y-4">
+              <label className="block font-medium">How many hours of sleep do you get?</label>
+              <div className="flex gap-3">
+                {["< 6 hours", "6-8 hours", "> 8 hours"].map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => updateAnswer("sleep", opt)}
+                    className={`flex-1 p-3 rounded-lg border text-sm ${
+                      answers.sleep === opt ? "bg-primary text-primary-foreground" : "bg-background"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Navigation */}
-        <div className="flex gap-3 mt-8">
+            <div className="space-y-4">
+              <label className="block font-medium">Do you use sunscreen daily?</label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => updateAnswer("sunscreen", true)}
+                  className={`flex-1 p-3 rounded-lg border ${answers.sunscreen === true ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  Yes, always
+                </button>
+                <button
+                  onClick={() => updateAnswer("sunscreen", false)}
+                  className={`flex-1 p-3 rounded-lg border ${answers.sunscreen === false ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  No / Sometimes
+                </button>
+              </div>
+            </div>
+
+             <div className="space-y-4">
+              <label className="block font-medium">Do you spend a lot of time outdoors?</label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => updateAnswer("outdoors", true)}
+                  className={`flex-1 p-3 rounded-lg border ${answers.outdoors === true ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => updateAnswer("outdoors", false)}
+                  className={`flex-1 p-3 rounded-lg border ${answers.outdoors === false ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      case 5:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-foreground">Current Routine</h2>
+            <p className="text-muted-foreground">What active ingredients do you currently use?</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {routineItems.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => toggleArrayAnswer("currentRoutine", item)}
+                  className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                    answers.currentRoutine.includes(item)
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background text-foreground border-border"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-yellow-800">
+                    <p className="font-semibold mb-1">Safety Check</p>
+                    <p>Have you ever had a severe reaction to skincare products?</p>
+                    <div className="flex gap-4 mt-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                checked={answers.reactions === true} 
+                                onChange={() => updateAnswer("reactions", true)}
+                                className="accent-yellow-600"
+                            />
+                            Yes
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                checked={answers.reactions === false} 
+                                onChange={() => updateAnswer("reactions", false)}
+                                className="accent-yellow-600"
+                            />
+                            No
+                        </label>
+                    </div>
+                </div>
+            </div>
+          </div>
+        )
+      case 6:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-foreground">What is your primary goal?</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {goals.map((goal) => (
+                <button
+                  key={goal}
+                  onClick={() => updateAnswer("goal", goal)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    answers.goal === goal
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="font-semibold text-lg">{goal}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <section className="max-w-4xl mx-auto px-4 py-12">
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex justify-between text-sm font-medium text-muted-foreground mb-2">
+          <span>Step {step} of {totalSteps}</span>
+          <span>{Math.round((step / totalSteps) * 100)}% Completed</span>
+        </div>
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-primary"
+            initial={{ width: 0 }}
+            animate={{ width: `${(step / totalSteps) * 100}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl shadow-sm border border-border p-6 md:p-10 min-h-[500px] flex flex-col">
+        <div className="flex-1">
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={step}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full"
+                >
+                    {renderStep()}
+                </motion.div>
+            </AnimatePresence>
+        </div>
+
+        <div className="flex justify-between mt-10 pt-6 border-t border-border">
           <button
-            onClick={() => setStep(Math.max(1, step - 1))}
+            onClick={handleBack}
             disabled={step === 1}
-            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors ${
               step === 1
-                ? "bg-muted text-muted-foreground cursor-not-allowed"
-                : "bg-muted text-foreground hover:bg-border"
+                ? "text-muted-foreground cursor-not-allowed"
+                : "text-foreground hover:bg-muted"
             }`}
           >
-            Back
+            <ChevronLeft className="w-5 h-5" /> Back
           </button>
 
-          {step < 3 ? (
-            <button
-              onClick={handleNext}
-              disabled={step === 1 && !analysis.skinType}
-              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-colors ${
-                step === 1 && !analysis.skinType
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-primary text-primary-foreground hover:opacity-90"
-              }`}
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={handleComplete}
-              className="flex-1 px-6 py-3 rounded-lg font-medium bg-primary text-primary-foreground hover:opacity-90 transition-colors"
-            >
-              See My Recommendations
-            </button>
-          )}
+          <button
+            onClick={handleNext}
+            disabled={step === 1 && !answers.skinType} // Basic validation for step 1
+            className="flex items-center gap-2 px-8 py-3 rounded-xl font-medium bg-primary text-primary-foreground hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+          >
+            {step === totalSteps ? "Analyze Profile" : "Next"}
+            {step !== totalSteps && <ChevronRight className="w-5 h-5" />}
+          </button>
         </div>
       </div>
     </section>
   )
-}
-
-function getSkintypeDescription(skinType) {
-  const descriptions = {
-    Oily: "Skin that tends to produce excess oil, especially in the T-zone. Best suited for lightweight, oil-free products.",
-    Dry: "Skin that lacks moisture and may feel tight. Benefits from rich, nourishing formulations.",
-    Combination: "Skin that is oily in some areas and dry in others. Requires balanced care.",
-    Sensitive: "Skin prone to irritation and redness. Needs gentle, fragrance-free products.",
-    Normal: "Balanced skin with minimal sensitivity. Versatile for most product types.",
-  }
-  return descriptions[skinType] || ""
 }

@@ -17,6 +17,8 @@ export const createProduct = async (req, res) => {
       skinConcerns,
       ingredients,
       allergyLabels,
+      activeIngredients,
+      warnings,
       variants,
     } = req.body;
 
@@ -72,6 +74,8 @@ export const createProduct = async (req, res) => {
       skinConcerns,
       ingredients,
       allergyLabels,
+      activeIngredients,
+      warnings,
       variants: processedVariants,
     });
 
@@ -135,6 +139,8 @@ export const updateProduct = async (req, res) => {
       skinConcerns,
       ingredients,
       allergyLabels,
+      activeIngredients,
+      warnings,
       variants,
     } = req.body;
 
@@ -192,6 +198,8 @@ export const updateProduct = async (req, res) => {
     product.skinConcerns = skinConcerns || product.skinConcerns;
     product.ingredients = ingredients || product.ingredients;
     product.allergyLabels = allergyLabels || product.allergyLabels;
+    product.activeIngredients = activeIngredients || product.activeIngredients;
+    product.warnings = warnings || product.warnings;
     product.variants = processedVariants;
 
     const updatedProduct = await product.save();

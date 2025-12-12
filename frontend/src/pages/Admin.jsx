@@ -9,7 +9,8 @@ import ProductsManager from "@/components/admin/products-manager"
 import OrdersSection from "@/components/admin/orders-section"
 import CategoriesSection from "@/components/product/categories-section"
 import CustomersSection from "@/components/admin/customers-section"
-import AdminContactMessages from "@/components/admin/AdminContactMessages"
+import AdminSkinAnalyzer from "./admin/AdminSkinAnalyzer";
+import AdminContactMessages from "@/components/admin/AdminContactMessages";
 
 export default function Admin() {
   const location = useLocation()
@@ -82,6 +83,9 @@ export default function Admin() {
           {currentSection === "categories" && <CategoriesSection />}
           {currentSection === "customers" && <CustomersSection customers={customers} />}
           {currentSection === "messages" && <AdminContactMessages />}
+          
+          {/* Skin Analyzer Sections */}
+          {currentSection === "skin-analyzer" && <AdminSkinAnalyzer />}
         </main>
       </div>
     </div>

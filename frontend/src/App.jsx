@@ -17,6 +17,7 @@ import AuthPage from './pages/AuthPage'
 import ContactPage from './pages/ContactPage'
 import AdminContactMessages from './components/admin/AdminContactMessages'
 import SkinAnalyzer from './pages/SkinAnalyzer'
+import SkinAnalysisResults from './pages/SkinAnalysisResults'
 import Admin from './pages/Admin'
 import AddProduct from './pages/admin/AddProduct'
 import AuthModal from './components/auth/AuthModal'
@@ -44,7 +45,8 @@ function AnimatedRoutes() {
         <Route path="/verify-otp" element={<AuthPage />} />
         <Route path="/reset-password" element={<AuthPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/skin-analyzer" element={<SkinAnalyzer />} />
+        <Route path="/skin-analyzer" element={authUser ? <SkinAnalyzer /> : <Navigate to="/login" />} />
+        <Route path="/skin-analyzer/results" element={authUser ? <SkinAnalysisResults /> : <Navigate to="/login" />} />
         <Route path="/admin" element={authUser?.role === "admin" ? <Admin /> : <Navigate to="/" />} />
         <Route path="/admin/add-product" element={authUser?.role === "admin" ? <AddProduct /> : <Navigate to="/" />} />
         <Route path="/admin/edit-product/:id" element={authUser?.role === "admin" ? <AddProduct /> : <Navigate to="/" />} />

@@ -39,6 +39,8 @@ const AddProduct = () => {
     status: "Active",
     featured: false,
     ingredients: "",
+    activeIngredients: "",
+    warnings: "",
     skinType: [],
     skinConcerns: [],
     allergyLabels: [],
@@ -72,6 +74,8 @@ const AddProduct = () => {
         status: product.status || "Active",
         featured: product.featured || false,
         ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(", ") : product.ingredients,
+        activeIngredients: Array.isArray(product.activeIngredients) ? product.activeIngredients.join(", ") : "",
+        warnings: Array.isArray(product.warnings) ? product.warnings.join(", ") : "",
         skinType: product.skinType || [],
         skinConcerns: product.skinConcerns || [],
         allergyLabels: product.allergyLabels || [],
@@ -162,6 +166,8 @@ const AddProduct = () => {
       const processedData = {
         ...formData,
         ingredients: formData.ingredients.split(",").map((item) => item.trim()),
+        activeIngredients: formData.activeIngredients.split(",").map((item) => item.trim()).filter(Boolean),
+        warnings: formData.warnings.split(",").map((item) => item.trim()).filter(Boolean),
       };
 
       if (isEditMode) {
@@ -377,7 +383,7 @@ const AddProduct = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Ingredients</label>
-                  <p className="text-xs text-gray-500 mb-1">Separate ingredients with commas</p>
+                  <p className="text-xs text-gray-500 mb-1">Full ingredient list (comma separated)</p>
                   <textarea
                     name="ingredients"
                     value={formData.ingredients}
@@ -386,6 +392,33 @@ const AddProduct = () => {
                     placeholder="Water, Glycerin, Niacinamide..."
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Active Ingredients</label>
+                    <p className="text-xs text-gray-500 mb-1">Key actives for analysis (comma separated)</p>
+                    <input
+                      type="text"
+                      name="activeIngredients"
+                      value={formData.activeIngredients}
+                      onChange={handleInputChange}
+                      placeholder="Salicylic Acid, Retinol, Vitamin C..."
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Warnings / Contraindications</label>
+                    <p className="text-xs text-gray-500 mb-1">Usage warnings (comma separated)</p>
+                    <input
+                      type="text"
+                      name="warnings"
+                      value={formData.warnings}
+                      onChange={handleInputChange}
+                      placeholder="Avoid with Retinol, Not for sensitive skin..."
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    />
+                  </div>
                 </div>
               </div>
             </section>
