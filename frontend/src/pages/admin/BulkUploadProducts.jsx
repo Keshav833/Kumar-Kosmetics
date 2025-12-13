@@ -244,10 +244,48 @@ export default function BulkUploadProducts() {
               {uploadResult.errors.length > 0 && (
                   <div className="text-left mb-8">
                       <h4 className="font-semibold text-red-600 mb-2">Errors:</h4>
-                      <div className="bg-red-50 p-4 rounded-lg max-h-40 overflow-y-auto text-sm">
+                      <div className="bg-red-50 p-4 rounded-lg max-h-96 overflow-y-auto text-sm">
                           {uploadResult.errors.map((err, i) => (
-                              <div key={i} className="text-red-700 mb-1">
-                                  Row {err.row} ({err.name}): {err.message}
+                              <div key={i} className="bg-white border border-red-100 rounded-lg p-4 mb-3 shadow-sm">
+                                  <div className="flex items-start gap-3">
+                                      <div className="bg-red-100 p-2 rounded-full mt-1">
+                                          <X className="w-4 h-4 text-red-600" />
+                                      </div>
+                                      <div className="flex-1">
+                                          <h5 className="font-semibold text-gray-800">
+                                              Row {err.row} – {err.productName || err.name}
+                                          </h5>
+                                          
+                                          {err.invalidValues ? (
+                                              <div className="mt-2 text-sm">
+                                                  <p className="text-red-600 font-medium mb-1">
+                                                      The {err.field} column contains unsupported values:
+                                                  </p>
+                                                  <ul className="list-disc list-inside text-red-700 mb-3 pl-2">
+                                                      {err.invalidValues.map((val, idx) => (
+                                                          <li key={idx}>{val}</li>
+                                                      ))}
+                                                  </ul>
+                                                  
+                                                  <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                                                      <p className="text-gray-600 font-medium mb-1 text-xs uppercase tracking-wide">
+                                                          Allowed {err.field}:
+                                                      </p>
+                                                      <p className="text-gray-500 leading-relaxed text-xs">
+                                                          {err.allowedValues.join(", ")}
+                                                      </p>
+                                                  </div>
+
+                                                  <div className="mt-3 text-gray-600 flex items-center gap-2 bg-blue-50 p-2 rounded text-xs text-blue-700">
+                                                      <span className="font-bold">👉 Fix:</span> 
+                                                      Replace invalid values with the allowed ones listed above, then re-upload.
+                                                  </div>
+                                              </div>
+                                          ) : (
+                                              <p className="text-red-600 mt-1 text-sm">{err.message}</p>
+                                          )}
+                                      </div>
+                                  </div>
                               </div>
                           ))}
                       </div>

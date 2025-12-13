@@ -24,124 +24,291 @@ const INGREDIENT_MAPPING = {
   "Puffiness": ["caffeine", "green-tea"],
 };
 
-// Helper: Tips generation based on profile
-const generateTips = (profile) => {
-  const tips = [];
+import SKIN_CONCERN_DATA from "../utils/skinConcernData.js";
+import SKIN_TYPE_DATA from "../utils/skinTypeData.js";
 
-  if (profile.skinType === "Oily") {
-    tips.push({
-      title: "Control Oil, Don't Strip It",
-      detail: "Use a gentle foaming cleanser and a lightweight, oil-free moisturizer. Over-washing can make your skin produce more oil.",
-    });
-  } else if (profile.skinType === "Dry") {
-    tips.push({
-      title: "Layer Your Hydration",
-      detail: "Start with a hydrating toner or essence, follow with a serum, and seal it all in with a rich moisturizer.",
-    });
-  } else if (profile.skinType === "Sensitive") {
-    tips.push({
-      title: "Less is More",
-      detail: "Stick to a simple routine with fragrance-free products. Introduce new actives one at a time.",
-    });
+// Helper: Generate Key Insights
+const generateInsights = (profile) => {
+  const insights = [];
+  
+  // 1. Skin Type Insights
+  const typeData = SKIN_TYPE_DATA[profile.skinType];
+  if (typeData && typeData.insights) {
+      insights.push(...typeData.insights);
   }
 
-  if (profile.concerns.includes("Acne") || profile.concerns.includes("Breakouts")) {
-    tips.push({
-      title: "Target Breakouts Gently",
-      detail: "Use Salicylic Acid (BHA) to unclog pores. Don't pick at blemishes to avoid scarring.",
-    });
-  }
+  // 2. Concern Insights (Dynamic from Map)
+  profile.concerns.forEach(concern => {
+    const data = SKIN_CONCERN_DATA[concern];
+    if (data && data.insights) {
+        // Add the first 2 insights for each concern
+        insights.push(...data.insights.slice(0, 2));
+    }
+  });
 
-  if (profile.concerns.includes("Pigmentation") || profile.concerns.includes("Dark spots")) {
-    tips.push({
-      title: "Brighten and Protect",
-      detail: "Vitamin C is your best friend for brightening. And never skip sunscreen—UV rays darken spots instantly.",
-    });
-  }
-
-  if (profile.concerns.includes("Fine lines") || profile.concerns.includes("Wrinkles")) {
-    tips.push({
-      title: "Start Anti-Aging Early",
-      detail: "Retinoids are the gold standard for anti-aging. Start slow (1-2x a week) to build tolerance.",
-    });
-  }
-
-  if (profile.lifestyle.sunscreen === false) {
-    tips.push({
-      title: "The #1 Rule: Sunscreen",
-      detail: "Sunscreen is the most effective anti-aging product. Wear it daily, even when it's cloudy.",
-    });
-  }
-
-  return tips;
+  return insights; // Frontend slices to top 3, but we return more for flexibility
 };
+
+const getSkinTypeInfo = (skinType) => {
+    return SKIN_TYPE_DATA[skinType] || {};
+};
+
+// Helper: Generate Routine Structure
+const generateRoutine = (profile, recommendations) => {
+  const steps = [];
+
+  // 1. Cleanser (ALWAYS)
+  steps.push({ 
+    name: "Cleanser", 
+    category: "Cleanser", 
+    description: "Gentle removal of impurities", 
+    icon: "Droplets",
+    frequency: "Daily"
+  });
+
+  // 2. Toner (OPTIONAL)
+  if (profile.skinType === "Dry" || profile.skinType === "Sensitive") {
+    steps.push({ 
+      name: "Toner", 
+      category: "Toner", 
+      description: "Prep and balance pH", 
+      icon: "Spray",
+      frequency: "Optional"
+    });
+  }
+
+  // 3. Serum / Treatment (CONDITIONAL)
+  const activeConcerns = ["Acne", "Pigmentation", "Dark spots", "Uneven tone", "Dullness", "Fine lines", "Wrinkles", "Uneven texture"];
+  const hasActiveConcern = profile.concerns.some(c => activeConcerns.includes(c));
+  const skipSerum = profile.skinType === "Sensitive" && !hasActiveConcern;
+
+  if (hasActiveConcern && !skipSerum) {
+    steps.push({ 
+      name: "Treatment", 
+      category: "Serum", 
+      description: "Target specific concerns", 
+      icon: "Sparkles",
+      frequency: "Daily"
+    });
+  }
+
+  // 4. Moisturizer (ALWAYS)
+  steps.push({ 
+    name: "Moisturizer", 
+    category: "Moisturizer", 
+    description: "Lock in hydration", 
+    icon: "Waves",
+    frequency: "Daily"
+  });
+
+  // 5. Sunscreen (ALWAYS)
+  steps.push({ 
+    name: "Sunscreen", 
+    category: "Sunscreen", 
+    description: "Protect from UV damage", 
+    icon: "Sun",
+    frequency: "Daily"
+  });
+
+  // 6. Mask (CONDITIONAL / OCCASIONAL)
+  const maskConcerns = ["Dullness", "Uneven texture"];
+  const showMask = (
+    maskConcerns.some(c => profile.concerns.includes(c)) || 
+    profile.skinType === "Dry" || 
+    profile.skinType === "Oily"
+  );
+  const skipMask = profile.skinType === "Sensitive" || profile.concerns.includes("Rosacea");
+
+  if (showMask && !skipMask) {
+    steps.push({ 
+      name: "Mask", 
+      category: "Mask", 
+      description: "Weekly boost", 
+      icon: "Smile", 
+      frequency: "Occasional"
+    });
+  }
+
+  return steps.map(step => {
+    // Find a product in recommendations that matches this category
+    const product = recommendations.find(p => 
+        p.category && p.category.toLowerCase().includes(step.category.toLowerCase())
+    );
+    
+    return {
+      step: step.name,
+      description: step.description,
+      icon: step.icon,
+      product: product || null, 
+      genericAdvice: !product ? `Choose a ${step.name.toLowerCase()} suitable for ${profile.skinType} skin.` : null,
+      frequency: step.frequency
+    };
+  });
+};
+
+// Helper: Generate Avoid List
+const generateAvoidList = (profile) => {
+  const avoid = [];
+  
+  if (profile.skinType === "Oily" || profile.concerns.includes("Acne")) {
+    avoid.push("Heavy, pore-clogging oils (Coconut oil, Cocoa butter)");
+    avoid.push("Over-washing (strips barrier, causes more oil)");
+  }
+  if (profile.skinType === "Dry") {
+    avoid.push("Harsh foaming cleansers (SLS/SLES)");
+    avoid.push("Alcohol-based toners");
+  }
+  if (profile.skinType === "Sensitive") {
+    avoid.push("Artificial fragrances & dyes");
+    avoid.push("Physical scrubs (walnut shells, apricot pits)");
+    avoid.push("Strong acids (high % Glycolic)");
+  }
+  
+  // General
+  avoid.push("Sleeping with makeup on");
+  
+  return [...new Set(avoid)].slice(0, 4);
+};
+
+// Helper: Generate Ingredient Highlights
+const generateIngredientHighlights = (profile) => {
+  const highlights = [];
+  const concernMap = {
+    "Acne": { name: "Salicylic Acid", benefit: "Penetrates pores to dissolve oil & bacteria" },
+    "Pigmentation": { name: "Vitamin C", benefit: "Inhibits melanin to brighten dark spots" },
+    "Dryness": { name: "Hyaluronic Acid", benefit: "Holds 1000x its weight in water" },
+    "Fine lines": { name: "Retinol", benefit: "Accelerates cell turnover & collagen" },
+    "Redness": { name: "Centella Asiatica", benefit: "Instantly soothes and calms inflammation" },
+    "Dullness": { name: "Glycolic Acid", benefit: "Exfoliates dead surface cells for glow" },
+    "Large pores": { name: "Niacinamide", benefit: "Tightens pores and regulates oil" }
+  };
+
+  profile.concerns.forEach(concern => {
+    if (concernMap[concern]) {
+        highlights.push(concernMap[concern]);
+    }
+  });
+
+  // Add Skin Type specific if space
+  if (profile.skinType === "Dry" && !highlights.find(h => h.name === "Ceramides")) {
+      highlights.push({ name: "Ceramides", benefit: "Restores the protective skin barrier" });
+  }
+
+  return [...new Set(highlights.map(JSON.stringify))].map(JSON.parse).slice(0, 4);
+};
+
+// Helper: Generate Timeline
+const generateTimeline = (profile) => {
+  const timeline = [];
+  
+  if (profile.concerns.includes("Dryness") || profile.skinType === "Dry") {
+    timeline.push({ period: "Immediate", result: "Relief from tightness & flaking" });
+  }
+  if (profile.concerns.includes("Dullness")) {
+    timeline.push({ period: "1-2 Weeks", result: "Noticeable glow & smoother texture" });
+  }
+  if (profile.concerns.includes("Acne") || profile.skinType === "Oily") {
+    timeline.push({ period: "3-4 Weeks", result: "Reduction in active breakouts & oil" });
+  }
+  if (profile.concerns.includes("Pigmentation") || profile.concerns.includes("Fine lines")) {
+    timeline.push({ period: "8-12 Weeks", result: "Visible fading of spots & firmer skin" });
+  }
+  
+  return timeline.length > 0 ? timeline : [{ period: "4 Weeks", result: "Visible improvement in overall skin health" }];
+};
+
+// Helper: Ingredient Conflicts
+const CONFLICTS = [
+  { ingredients: ["Retinol", "Vitamin C"], reason: "May cause irritation used together" },
+  { ingredients: ["Retinol", "AHAs/BHAs"], reason: "High irritation risk" },
+  { ingredients: ["Retinol", "Salicylic Acid"], reason: "Excessive drying risk" },
+  { ingredients: ["Vitamin C", "AHAs/BHAs"], reason: "Can destabilize Vitamin C" },
+  { ingredients: ["Benzoyl Peroxide", "Retinol"], reason: "Deactivates each other" }
+];
 
 // Helper: Score products based on profile
 const scoreProducts = (profile, products) => {
   return products.map((product) => {
     let score = 0;
     const reasons = [];
+    
+    // 1. Skin Type Match (Weight: 3)
+    if (product.skinType && (product.skinType.includes(profile.skinType) || product.skinType.includes("All"))) {
+      score += 3;
+      // reasons.push("Matches your skin type");
+    }
 
-    // A. Match Concerns (High Weight)
+    // 2. Concern Match (Weight: 5)
     profile.concerns.forEach((concern) => {
-      // Direct match in product's skinConcerns
       if (product.skinConcerns && product.skinConcerns.includes(concern)) {
         score += 5;
         if (!reasons.includes(`Targets ${concern}`)) reasons.push(`Targets ${concern}`);
       }
+    });
 
-      // Match via Active Ingredients
+    // 3. Ingredient Match (Weight: 4)
+    // Check if product has ingredients that help with user's concerns
+    profile.concerns.forEach((concern) => {
       const targetIngredients = INGREDIENT_MAPPING[concern] || [];
       const productActives = product.activeIngredients || [];
       
-      const hasActive = productActives.some(active => targetIngredients.includes(active.toLowerCase()));
-      if (hasActive) {
-          score += 4;
-          // Find which active matched for the reason
-          const matchedActive = productActives.find(active => targetIngredients.includes(active.toLowerCase()));
-          if (matchedActive && !reasons.includes(`Contains ${matchedActive}`)) {
-              reasons.push(`Contains ${matchedActive}`);
-          }
+      const matchedActive = productActives.find(active => 
+        targetIngredients.some(target => target.toLowerCase() === active.toLowerCase())
+      );
+
+      if (matchedActive) {
+        score += 4;
+        if (!reasons.includes(`Contains ${matchedActive}`)) {
+            reasons.push(`Contains ${matchedActive}`);
+        }
       }
     });
 
-    // B. Skin Type Bonus
-    if (product.skinType && product.skinType.includes(profile.skinType)) {
-      score += 3;
+    // 4. Allergy Penalty (Weight: 100)
+    // Filter out products with user's allergies
+    const hasAllergy = profile.allergies.some(allergy => {
+        // Simple check: if product ingredients or allergyLabels imply the allergy
+        // Note: In real app, we'd check full ingredient list. 
+        // Here we rely on allergyLabels (e.g. "Fragrance-free") vs allergy "Fragrance"
+        if (allergy === "Fragrance" && !product.allergyLabels.includes("Fragrance-free")) return true;
+        if (allergy === "Parabens" && !product.allergyLabels.includes("Paraben-free")) return true;
+        // ... add more mapping if needed
+        return false;
+    });
+
+    if (hasAllergy) {
+        score -= 100;
+        reasons.push("Contains potential allergen");
     }
 
-    // C. Goal Alignment
-    if (profile.goal) {
-        // Simple keyword matching for goal
-        const goalKeywords = profile.goal.toLowerCase().split(" ");
-        const productTags = (product.tags || []).concat(product.category.toLowerCase());
-        
-        if (productTags.some(tag => goalKeywords.some(k => tag.includes(k)))) {
-            score += 2;
-        }
-    }
+    // 5. Conflict Penalty (Weight: 50)
+    // Check against current routine
+    profile.currentRoutine.forEach(routineItem => {
+        const productActives = product.activeIngredients || [];
+        productActives.forEach(active => {
+            const conflict = CONFLICTS.find(c => 
+                (c.ingredients.includes(routineItem) && c.ingredients.includes(active))
+            );
+            if (conflict) {
+                score -= 50;
+                reasons.push(`Conflict: ${active} vs ${routineItem} (${conflict.reason})`);
+            }
+        });
+    });
 
-    // D. Penalties / Exclusions
-    
-    // Fragrance Check (if sensitive or allergic)
-    if ((profile.skinType === "Sensitive" || profile.allergies.includes("Fragrance")) && !product.allergyLabels.includes("Fragrance-free")) {
-        score -= 10;
-    }
-
-    // Contraindications (Simple Example)
-    if (profile.currentRoutine.includes("Retinol") && product.activeIngredients.includes("Retinol")) {
-        // score -= 5; 
-    }
-
-    // Normalize score to percentage (rough approximation, max score ~30-40)
-    // Let's cap it at 98% for realism, and ensure it's at least 60% if it's a match
+    // Normalize score to percentage
+    // Base score is 60, max added is roughly 30-40. 
+    // We want to keep it between 60 and 98 for good matches.
     let percentage = Math.min(98, Math.max(60, 60 + score * 2));
+    
+    // If heavily penalized, drop the score significantly
+    if (score < 0) percentage = 10; 
 
     return {
       ...product.toObject(),
       matchScore: Math.round(percentage),
       matchReasons: reasons,
-      rawScore: score // Keep raw score for sorting
+      rawScore: score 
     };
   });
 };
@@ -190,8 +357,13 @@ export const evaluateProfile = async (req, res) => {
       .sort((a, b) => b.rawScore - a.rawScore)
       .slice(0, 6); // Top 6
 
-    // 4. Generate Tips
-    const tips = generateTips(profile);
+    // 4. Generate Comprehensive Analysis Data
+    const insights = generateInsights(profile);
+    const routine = generateRoutine(profile, recommendations);
+    const avoid = generateAvoidList(profile);
+    const ingredientHighlights = generateIngredientHighlights(profile);
+    const timeline = generateTimeline(profile);
+    const skinTypeInfo = getSkinTypeInfo(profile.skinType);
 
     // 5. Save Profile if User is Logged In
     if (userId) {
@@ -209,8 +381,15 @@ export const evaluateProfile = async (req, res) => {
 
     res.json({
       profile,
-      tips,
       recommendations,
+      analysisResult: {
+        insights,
+        routine,
+        avoid,
+        ingredientHighlights,
+        timeline,
+        skinTypeInfo
+      }
     });
 
   } catch (error) {
@@ -246,22 +425,27 @@ export const getProfile = async (req, res) => {
             return res.status(404).json({ message: "Profile not found" });
         }
 
-        // Generate tips dynamically
-        const tips = generateTips(profile);
-
-        // Re-calculate scores for display
-        // We need to pass the populated products to the scoring function
-        // Note: scoreProducts expects Mongoose documents or objects. 
-        // populate returns documents, so we should be good.
-        // However, scoreProducts calls .toObject(), so we need to make sure we don't double call it if they are already objects.
-        // Actually, populate returns documents. scoreProducts calls .toObject().
-        
+        // Generate comprehensive analysis data dynamically
         const scoredRecommendations = scoreProducts(profile, profile.recommendedProducts);
+        
+        const insights = generateInsights(profile);
+        const routine = generateRoutine(profile, scoredRecommendations);
+        const avoid = generateAvoidList(profile);
+        const ingredientHighlights = generateIngredientHighlights(profile);
+        const timeline = generateTimeline(profile);
+        const skinTypeInfo = getSkinTypeInfo(profile.skinType);
 
         res.json({
             profile,
-            tips,
-            recommendations: scoredRecommendations
+            recommendations: scoredRecommendations,
+            analysisResult: {
+                insights,
+                routine,
+                avoid,
+                ingredientHighlights,
+                timeline,
+                skinTypeInfo
+            }
         });
     } catch (error) {
         console.error("Error fetching profile:", error);

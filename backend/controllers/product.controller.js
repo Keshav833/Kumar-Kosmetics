@@ -1,6 +1,31 @@
 import Product from "../models/product.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
+const ALLOWED_SKIN_CONCERNS = [
+  "Acne",
+  "Breakouts",
+  "Blackheads",
+  "Large pores",
+  "Pigmentation",
+  "Dark spots",
+  "Uneven tone",
+  "Dullness",
+  "Uneven texture",
+  "Fine lines",
+  "Wrinkles",
+  "Loss of firmness",
+  "Redness",
+  "Rosacea",
+  "Dark circles",
+  "Puffiness"
+];
+
+const NORMALIZATION_MAP = {
+  "Sensitivity": "Redness",
+  "Dryness": "Dullness",
+  "OilControl": "Large pores"
+};
+
 export const createProduct = async (req, res) => {
   try {
     const {
@@ -237,11 +262,34 @@ export const bulkCreateProducts = async (req, res) => {
                 throw new Error(`Product with name "${productData.name}" already exists`);
             }
 
+            // Validate and Normalize Skin Concerns
+            let skinConcerns = Array.isArray(productData.skinConcerns) ? productData.skinConcerns : [];
+            
+            // Apply Normalization
+            skinConcerns = skinConcerns.map(c => NORMALIZATION_MAP[c] || c);
+
+            // Validate against Allowed Values
+            const invalidConcerns = skinConcerns.filter(c => !ALLOWED_SKIN_CONCERNS.includes(c));
+            
+            if (invalidConcerns.length > 0) {
+                // Push structured error
+                errors.push({
+                    row: i + 1,
+                    productName: productData.name,
+                    field: "skinConcerns",
+                    invalidValues: invalidConcerns,
+                    allowedValues: ALLOWED_SKIN_CONCERNS,
+                    message: `Invalid skin concerns: ${invalidConcerns.join(", ")}`
+                });
+                failed++;
+                continue; // Skip saving this product
+            }
+
             const newProduct = new Product({
                 ...productData,
                 images: Array.isArray(productData.images) ? productData.images : [],
                 skinType: Array.isArray(productData.skinType) ? productData.skinType : [],
-                skinConcerns: Array.isArray(productData.skinConcerns) ? productData.skinConcerns : [],
+                skinConcerns: skinConcerns, // Use normalized and validated concerns
                 allergyLabels: Array.isArray(productData.allergyLabels) ? productData.allergyLabels : [],
                 ingredients: Array.isArray(productData.ingredients) ? productData.ingredients : [],
                 variants: Array.isArray(productData.variants) ? productData.variants : [],
@@ -252,10 +300,22 @@ export const bulkCreateProducts = async (req, res) => {
 
         } catch (err) {
             failed++;
-            errors.push({ row: i + 1, name: productData.name || "Unknown", message: err.message });
+            errors.push({ 
+                row: i + 1, 
+                productName: productData.name || "Unknown", 
+                message: err.message,
+                // If it's not a validation error we explicitly created, it might not have the extra fields, so we leave them undefined or generic
+            });
         }
     }
 
+    // If we have errors, we might want to return 400 or 207 (Multi-Status), but user asked to return errors in the response.
+    // The previous implementation returned 201 even with errors. I'll stick to 201 but include errors.
+    // However, if ALL failed, maybe 400?
+    // The user's example: "if (errors.length > 0) return res.status(400)..."
+    // But we are processing row by row. If some succeed and some fail, we should probably return a summary.
+    // I will return 200/201 with the summary and errors array.
+    
     res.status(201).json({
         message: "Bulk upload processed",
         summary: {
