@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
 import toast from "react-hot-toast";
 import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Instagram, Facebook, Twitter } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
 import { motion } from "framer-motion";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -10,6 +11,7 @@ import Footer from "@/components/layout/footer";
 
 export default function ContactPage() {
   const videoRef = useRef(null);
+  const { authUser } = useAuthStore();
 
   useEffect(() => {
     if (videoRef.current) {
@@ -23,6 +25,17 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
+
+  useEffect(() => {
+    if (authUser) {
+      setFormData(prev => ({
+        ...prev,
+        name: authUser.name || "",
+        email: authUser.email || ""
+      }));
+    }
+  }, [authUser]);
+
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -55,7 +68,7 @@ export default function ContactPage() {
         <div className="max-w-5xl mx-auto px-4 py-8 -mt-8 relative z-20 ">
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-20">
             {/* Contact Information Cards */}
-            <div className="lg:col-span-3 h-full bg-gradient-to-b from-blue-800/60 to-blue-200 p-5 rounded-xl text-white relative overflow-hidden">
+            <div className="lg:col-span-3 h-full bg-gradient-to-b from-blue-800/60 to-blue-100 p-5 rounded-xl text-white relative overflow-hidden">
               <video
                 ref={videoRef}
                 autoPlay
@@ -165,7 +178,8 @@ export default function ContactPage() {
                         required
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white text-sm"
+                        disabled={!!authUser}
+                        className={`w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white text-sm ${authUser ? 'opacity-70 cursor-not-allowed bg-gray-100' : ''}`}
                         placeholder="John Doe"
                       />
                     </div>
@@ -180,7 +194,8 @@ export default function ContactPage() {
                         required
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white text-sm"
+                        disabled={!!authUser}
+                        className={`w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white text-sm ${authUser ? 'opacity-70 cursor-not-allowed bg-gray-100' : ''}`}
                         placeholder="john@example.com"
                       />
                     </div>
