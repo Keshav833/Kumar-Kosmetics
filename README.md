@@ -2,7 +2,7 @@
 
   <img src="frontend/public/KKLogo.png" alt="Kumar Kosmetics Logo" width="180" />
 
-# 💄 Kumar Kosmetics
+#  Kumar Kosmetics
 
 ### _Redefining Beauty with Smart Tech & Elegance_
 
@@ -24,6 +24,20 @@
 </div>
 
 ---
+
+
+## ✨ Features Summary
+
+| Feature Category      | Key Capabilities                                                                                                                                                                                    |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **🤖 Smart Tech**     | • **Skin Analyzer**: Interactive quiz for personalized product matching.<br>• **Smart Recommendations**: Algorithm-based suggestions.                                                               |
+| **🔐 Authentication** | • **Secure Login**: JWT & Bcrypt protection.<br>• **Social Auth**: Google OAuth integration.<br>• **Recovery**: OTP-based password reset flow.                                                      |
+| **🛍️ Shopping**       | • **Dynamic Cart**: Real-time updates & calculations.<br>• **Global Search**: Animated, centralized product search.<br>• **Payments**: Stripe & Razorpay integration.                               |
+| **🎨 UI/UX**          | • **Premium Design**: Glassmorphism, magnetic buttons, & fluid animations.<br>• **Responsive**: Optimized for all devices via Tailwind CSS v4.<br>• **Dock Navigation**: macOS-style floating menu. |
+| **🛠️ Admin**          | • **Dashboard**: Analytics & sales overview.<br>• **Product Management**: Create, update, delete products.<br>• **Customer Service**: Message center for inquiries.                                 |
+
+---
+
 
 ## 📂 Project Structure
 
@@ -55,18 +69,6 @@ Kumar-Kosmetics/
 
 ---
 
-## ✨ Features Summary
-
-| Feature Category      | Key Capabilities                                                                                                                                                                                    |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **🤖 Smart Tech**     | • **Skin Analyzer**: Interactive quiz for personalized product matching.<br>• **Smart Recommendations**: Algorithm-based suggestions.                                                               |
-| **🔐 Authentication** | • **Secure Login**: JWT & Bcrypt protection.<br>• **Social Auth**: Google OAuth integration.<br>• **Recovery**: OTP-based password reset flow.                                                      |
-| **🛍️ Shopping**       | • **Dynamic Cart**: Real-time updates & calculations.<br>• **Global Search**: Animated, centralized product search.<br>• **Payments**: Stripe & Razorpay integration.                               |
-| **🎨 UI/UX**          | • **Premium Design**: Glassmorphism, magnetic buttons, & fluid animations.<br>• **Responsive**: Optimized for all devices via Tailwind CSS v4.<br>• **Dock Navigation**: macOS-style floating menu. |
-| **🛠️ Admin**          | • **Dashboard**: Analytics & sales overview.<br>• **Product Management**: Create, update, delete products.<br>• **Customer Service**: Message center for inquiries.                                 |
-
----
-
 ## 🛠️ Tech Stack
 
 We use the cutting-edge **MERN Stack** supercharged with modern tooling.
@@ -82,7 +84,6 @@ We use the cutting-edge **MERN Stack** supercharged with modern tooling.
 |              | **MongoDB + Mongoose** | Flexible, document-based data storage  |
 |              | **Redis**              | High-performance caching               |
 |              | **Cloudinary**         | Optimized media management & delivery  |
-| **DevOps**   | **ESLint**             | Code quality & consistency             |
 
 ---
 
@@ -157,7 +158,7 @@ Distributed under the **ISC License**. See `LICENSE` for more information.
 
 ### 🤝 Join the Revolution
 
-_Made by me and team_
+_Made by Keshav Chauhan_
 
 [Report Bug](https://github.com/your-username/kumar-kosmetics/issues) • [Request Feature](https://github.com/your-username/kumar-kosmetics/issues)
 
