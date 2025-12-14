@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, AlertTriangle, Star, Droplets, Sparkles, Sun, Waves, SprayCan, Clock, ShieldAlert, FlaskConical, Download, ShoppingBag, Smile } from "lucide-react"
+import { ArrowLeft, Check, AlertTriangle, Star, Droplets, Sparkles, Sun, Waves, SprayCan, Clock, ShieldAlert, FlaskConical, Download, ShoppingBag, Smile, Lightbulb } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useCartStore } from "@/store/useCartStore"
 import { useAuthStore } from "@/store/useAuthStore"
@@ -41,7 +41,7 @@ export default function RecommendedProducts({ analysis, onReset }) {
       <section className="bg-white border-b border-gray-200 pt-12 pb-8 px-4">
         <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-light text-foreground">
+                <h1 className="text-2xl font-bold text-blue-900">
                     Your Skin Profile
                 </h1>
                 <div className="text-sm text-muted-foreground">#{profile._id?.slice(-6).toUpperCase()}</div>
@@ -89,8 +89,8 @@ export default function RecommendedProducts({ analysis, onReset }) {
         
         {/* 2. Key Insights (Limit to 3) */}
         <section>
-            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" /> Key Insights
+            <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-primary" /> Key Insights
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {insights?.slice(0, 3).map((insight, idx) => (
@@ -106,7 +106,7 @@ export default function RecommendedProducts({ analysis, onReset }) {
 
         {/* 3. Routine Structure */}
         <section>
-            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
                 <Droplets className="w-5 h-5 text-primary" /> Suggested Routine
             </h2>
             <div className="space-y-4">
@@ -123,7 +123,7 @@ export default function RecommendedProducts({ analysis, onReset }) {
                                     <div className="font-semibold text-foreground flex items-center gap-2">
                                         {step.step}
                                         {step.frequency && (step.frequency === "Optional" || step.frequency === "Occasional") && (
-                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase tracking-wide">
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-blue-900 uppercase tracking-wide">
                                                 {step.frequency}
                                             </span>
                                         )}
@@ -150,7 +150,7 @@ export default function RecommendedProducts({ analysis, onReset }) {
                             {step.product && (
                                 <button 
                                     onClick={(e) => handleAddToCart(e, step.product)}
-                                    className="w-full sm:w-auto px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                                    className="w-full sm:w-auto px-4 py-2 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
                                 >
                                     Add
                                 </button>
@@ -163,7 +163,7 @@ export default function RecommendedProducts({ analysis, onReset }) {
 
         {/* 4. Products Grid */}
         <section>
-            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5 text-primary" /> Top Recommendations
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

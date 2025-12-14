@@ -129,6 +129,7 @@ export default function Header() {
         <div 
             className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-border py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 cursor-default text-left"
             onClick={(e) => e.stopPropagation()}
+            onMouseMove={(e) => e.stopPropagation()}
         >
             <div className="px-4 py-2 border-b border-border">
               <p className="text-sm font-medium text-foreground truncate">{authUser.name}</p>

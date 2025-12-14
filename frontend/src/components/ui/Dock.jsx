@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence, MotionValue } from 'framer-motion';
 import { Children, cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from 'react';
 
 function DockItem({ children, className = '', onClick, mouseX, spring, distance, magnification, baseItemSize }) {
@@ -75,8 +75,17 @@ function DockLabel({ children, className = '', ...rest }) {
   );
 }
 
-function DockIcon({ children, className = '' }) {
-  return <div className={`flex items-center justify-center w-full h-full ${className}`}>{children}</div>;
+function DockIcon({ children, className = '', isHovered }) {
+  const scale = useTransform(isHovered || new MotionValue(0), [0, 1], [1, 1.2]);
+
+  return (
+    <motion.div 
+      style={{ scale }}
+      className={`flex items-center justify-center w-full h-full ${className}`}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 function DockDropdown({ children, isHovered }) {
