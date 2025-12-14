@@ -71,7 +71,7 @@ export default function Header() {
     }
   }
 
-  const isTransparentNav = location.pathname === "/" || location.pathname === "/products"
+  const isTransparentNav = location.pathname === "/" || location.pathname === "/products" || location.pathname === "/about"
   
   const textColorClass = "text-foreground hover:text-primary"
   const iconColorClass = "text-foreground"

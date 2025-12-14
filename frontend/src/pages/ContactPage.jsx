@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axiosInstance from "@/lib/axios";
 import toast from "react-hot-toast";
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Instagram, Facebook, Twitter } from "lucide-react";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
@@ -41,60 +41,63 @@ export default function ContactPage() {
       <Header />
       
       <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-primary text-primary-foreground py-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="max-w-7xl mx-auto px-4 relative z-10 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-              Get in Touch
-            </h1>
-            <p className="text-base md:text-lg text-primary-foreground/90 max-w-2xl mx-auto leading-relaxed">
-              We'd love to hear from you. Whether you have a question about our products, 
-              need assistance, or just want to say hello, our team is here to help.
-            </p>
-          </div>
-        </section>
+       
 
-        <div className="max-w-6xl mx-auto px-4 py-8 -mt-8 relative z-20">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-5xl mx-auto px-4 py-8 -mt-8 relative z-20 ">
+          <div className="grid grid-cols-1 lg:grid-cols-7 gap-20">
             {/* Contact Information Cards */}
-            <div className="lg:col-span-1 space-y-4">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+            <div className="lg:col-span-3 h-full space-y-4 bg-gradient-to-b from-blue-500 to-blue-200 p-5 rounded-xl text-white">
+              <div className="px-6 pt-4">
+                <h2 className="text-2xl font-bold text-white">Get in Touch</h2>
+                {/* <p className="text-blue-50 text-sm mt-1">We'd love to hear from you.</p> */}
+              </div>
+              <div className="px-6 rounded-xl hover:bg-white/10 transition-colors">
+                <div className="flex items-center gap-2 mb-2">
+                  {/* <div className=" rounded-lg flex items-center justify-center text-white"> */}
                     <Mail className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900">Email Us</h3>
+                  {/* </div> */}
+                  <h3 className="text-md font-semibold text-white">Email Us</h3>
                 </div>
-                <p className="text-gray-600 text-sm mb-2">Our friendly team is here to help.</p>
-                <a href="mailto:support@kumarkosmetics.com" className="text-primary font-medium hover:underline text-sm">support@kumarkosmetics.com</a>
+                <p className="text-blue-50 text-xs mb-1 font-medium">Our friendly team is here to help.</p>
+                <a href="mailto:korplz1408@gmail.com" className="text-white font-medium hover:underline text-sm">korplz1408@gmail.com</a>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900">Visit Us</h3>
+              <div className="px-6  rounded-xl hover:bg-white/10 transition-colors">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-5 h-5" />
+                  <h3 className="text-md font-semibold text-white">Visit Us</h3>
                 </div>
-                <p className="text-gray-600 text-sm mb-2">Come say hello at our office headquarters.</p>
-                <p className="text-gray-900 font-medium text-sm">123 Skincare Lane, Beauty City, BC 12345</p>
+                <p className="text-blue-50 text-xs mb-1 font-medium">Come say hello at our office headquarters.</p>
+                <p className="text-white font-medium text-sm">123 Skincare Lane, Beauty City, BC 12345</p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900">Business Hours</h3>
+              <div className="px-6  rounded-xl hover:bg-white/10 transition-colors">
+                <div className="flex items-center gap-2 mb-2">
+                  <Phone className="w-5 h-5" />
+                  <h3 className="text-md font-semibold text-white">Call Us</h3>
                 </div>
-                <p className="text-gray-600 text-sm mb-1">Mon - Fri: 9am - 6pm</p>
-                <p className="text-gray-600 text-sm">Sat - Sun: Closed</p>
+                <p className="text-blue-50 text-xs mb-1 font-medium">Mon - Fri: 9am - 6pm</p>
+                <a href="tel:+1234567890" className="text-white font-medium hover:underline text-sm">+1 (234) 567-890</a>
+              </div>
+
+              <div className="px-6  rounded-xl">
+                <h3 className="text-md font-semibold text-white mb-3">Follow Us</h3>
+                <div className="flex gap-4">
+                  <a href="#" className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                  <a href="#" className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                  <a href="#" className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                </div>
               </div>
             </div>
 
             {/* Contact Form */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-4">
               <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 h-full">
                 <div className="mb-6">
                   <h2 className="text-xl font-bold text-gray-900 mb-1">Send us a Message</h2>
