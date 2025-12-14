@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import CheckoutForm from "@/components/checkout/checkout-form";
@@ -18,11 +18,16 @@ export default function Checkout() {
 		city: "",
 		state: "",
 		pincode: "",
+		pincode: "",
 		phone: "",
 	});
-
 	const { cart, getCart, clearCart } = useCartStore();
 	const navigate = useNavigate();
+    const location = useLocation();
+
+    const [couponCode, setCouponCode] = useState(location.state?.couponCode || "");
+    const [isCouponApplied, setIsCouponApplied] = useState(location.state?.isCouponApplied || false);
+    const [discount, setDiscount] = useState(location.state?.discount || 0);
 
 	useEffect(() => {
 		getCart();
@@ -44,8 +49,35 @@ export default function Checkout() {
     
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 	const shipping = calculatedInclusiveSubtotal > 1500 ? 0 : totalQuantity * 50;
-	const total = calculatedInclusiveSubtotal + shipping;
+    
+    // Recalculate total with discount
+	const total = calculatedInclusiveSubtotal + shipping - discount;
 
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        try {
+            const res = await axiosInstance.post("/cart/validate-coupon", { code: couponCode });
+            if (res.data.valid) {
+                setIsCouponApplied(true);
+                if (res.data.type === 'free_delivery') {
+                    if (shipping > 0) {
+                        setDiscount(shipping);
+                        toast.success(res.data.message);
+                    } else {
+                        toast.success("Free delivery already applied on orders above ₹1500!");
+                        // Still mark as applied but discount is 0 effectively (or we can set it to shipping which is 0)
+                        setDiscount(0);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Coupon error:", error);
+            toast.error(error.response?.data?.message || "Invalid Coupon Code");
+            setIsCouponApplied(false);
+            setDiscount(0);
+        }
+    };
+    
 	const handleFormSubmit = (data) => {
 		setOrderData(data);
 		setStep(2);
@@ -106,6 +138,7 @@ export default function Checkout() {
 								tax={tax}
 								shipping={shipping}
 								total={total}
+                                discount={discount}
 							/>
 						</aside>
 					</div>
@@ -120,6 +153,8 @@ export default function Checkout() {
 								cartItems={cartItems}
 								onSuccess={handlePaymentSuccess}
 								onBack={() => setStep(1)}
+                                couponCode={isCouponApplied ? couponCode : null}
+                                discountAmount={discount}
 							/>
 						</div>
 						<aside className="lg:col-span-1">
@@ -129,6 +164,7 @@ export default function Checkout() {
 								tax={tax}
 								shipping={shipping}
 								total={total}
+                                discount={discount}
 							/>
 						</aside>
 					</div>
@@ -140,48 +176,133 @@ export default function Checkout() {
 	);
 }
 
-function PaymentForm({ orderData, total, cartItems, onSuccess, onBack }) {
+function PaymentForm({ orderData, total, cartItems, onSuccess, onBack, couponCode, discountAmount }) {
 	const [loading, setLoading] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState("COD");
+    const [paymentMethod, setPaymentMethod] = useState("Online"); // Default to Online for better UX
     const { clearCart } = useCartStore();
     const navigate = useNavigate();
 
 	const handlePayment = async () => {
         setLoading(true);
 		try {
-            // Create Order in Backend
-            const orderRes = await axiosInstance.post("/orders", {
-                items: cartItems.map(item => ({
-                    product: item.product._id,
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    image: item.image,
-                    variant: item.variant
-                })),
-                totalAmount: total,
-                address: {
-                    fullName: `${orderData.firstName} ${orderData.lastName}`,
-                    phone: orderData.phone,
-                    address: orderData.address,
-                    city: orderData.city,
-                    state: orderData.state,
-                    pincode: orderData.pincode
-                },
-                paymentMethod: paymentMethod
-            });
+            if (paymentMethod === "COD") {
+                // Create Order in Backend for COD
+                const orderRes = await axiosInstance.post("/orders", {
+                    items: cartItems.map(item => ({
+                        product: item.product._id,
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price,
+                        image: item.image,
+                        variant: item.variant
+                    })),
+                    totalAmount: total,
+                    address: {
+                        fullName: `${orderData.firstName} ${orderData.lastName}`,
+                        phone: orderData.phone,
+                        address: orderData.address,
+                        city: orderData.city,
+                        state: orderData.state,
+                        pincode: orderData.pincode
+                    },
+                    paymentMethod: paymentMethod
+                });
 
-            if(orderRes.status === 201) {
-                toast.success("Order Placed Successfully!");
-                clearCart();
-                navigate("/order-success");
+                if(orderRes.status === 201) {
+                    toast.success("Order Placed Successfully!");
+                    clearCart();
+                    navigate("/order-success");
+                }
+            } else {
+                // Online Payment Flow
+                // 1. Get Razorpay Key
+                const { data: { key } } = await axiosInstance.get("/payment/get-key");
+
+                // 2. Create Order in Backend (Razorpay Order)
+                const { data: { order } } = await axiosInstance.post("/payment/create-order", {
+                    amount: total
+                });
+
+                // 3. Initialize Razorpay Options
+                const options = {
+                    key: key,
+                    amount: order.amount,
+                    currency: "INR",
+                    name: "Kumar Kosmetics",
+                    description: "Payment for your order",
+                    image: "/KKLogo.png", // Ensure this path is correct
+                    order_id: order.id,
+                    callback_url: "http://localhost:5000/api/payment/verify-payment", // Fallback if handler fails, but we use handler
+                    handler: async function (response) {
+                        // 4. Verify Payment
+                        // We need to create the actual order in our DB first or update it. 
+                        // The current backend flow for `verifyPayment` expects an `orderId` to update status.
+                        // However, we haven't created the order in our DB yet, only in Razorpay.
+                        // Strategy: Create the order in DB *before* or *after* payment?
+                        // User flow says: Backend creates order -> Razorpay opens.
+                        // Let's create the order in our DB with status "Pending" first, then update it.
+                        
+                        // Actually, looking at `verifyPayment` controller:
+                        // if(orderId){ const order = await Order.findById(orderId); ... }
+                        // So we need an orderId.
+                        
+                        // Let's create the order in DB first as "Pending"
+                        try {
+                             const dbOrderRes = await axiosInstance.post("/orders", {
+                                items: cartItems.map(item => ({
+                                    product: item.product._id,
+                                    name: item.name,
+                                    quantity: item.quantity,
+                                    price: item.price,
+                                    image: item.image,
+                                    variant: item.variant
+                                })),
+                                totalAmount: total,
+                                address: {
+                                    fullName: `${orderData.firstName} ${orderData.lastName}`,
+                                    phone: orderData.phone,
+                                    address: orderData.address,
+                                    city: orderData.city,
+                                    state: orderData.state,
+                                    pincode: orderData.pincode
+                                },
+                                paymentMethod: "Online",
+                                paymentStatus: "Pending", // Initial status
+                                couponCode: couponCode,
+                                discountAmount: discountAmount
+                            });
+
+                            if (dbOrderRes.status === 201) {
+                                const orderId = dbOrderRes.data._id; // Assuming backend returns the created order object
+                                await onSuccess(response, orderId);
+                            }
+                        } catch (err) {
+                            console.error("Failed to create local order:", err);
+                            toast.error("Failed to create order record.");
+                        }
+                    },
+                    prefill: {
+                        name: `${orderData.firstName} ${orderData.lastName}`,
+                        email: orderData.email,
+                        contact: orderData.phone
+                    },
+                    notes: {
+                        address: orderData.address
+                    },
+                    theme: {
+                        color: "#3399cc"
+                    }
+                };
+
+                const rzp1 = new window.Razorpay(options);
+                rzp1.open();
             }
+
 		} catch (error) {
 			console.error("Order placement error:", error);
             if (error.response) {
                 console.error("Server response:", error.response.data);
                 toast.error(error.response.data.message || "Failed to place order");
-                if (error.response.data.details) console.error("Validation details:", error.response.data.details);
             } else {
 			    toast.error("Failed to place order");
             }
@@ -200,12 +321,10 @@ function PaymentForm({ orderData, total, cartItems, onSuccess, onBack }) {
 					<span className="font-medium text-foreground">Cash on Delivery (COD)</span>
 				</label>
                 {/* Placeholder for future Online Payment */}
-                <div className="p-4 border-2 border-border rounded-lg opacity-50 cursor-not-allowed">
-                    <div className="flex items-center gap-3">
-                        <input type="radio" name="payment" disabled className="w-4 h-4" />
-                        <span className="font-medium text-foreground">Online Payment (Coming Soon)</span>
-                    </div>
-                </div>
+                <label className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${paymentMethod === 'Online' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'}`}>
+                    <input type="radio" name="payment" checked={paymentMethod === 'Online'} onChange={() => setPaymentMethod('Online')} className="w-4 h-4" />
+                    <span className="font-medium text-foreground">Online Payment (Razorpay)</span>
+                </label>
 			</div>
 
 			<div className="space-y-4">

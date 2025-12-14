@@ -70,3 +70,7 @@ export const verifyPayment = async (req, res) => {
 		res.status(500).json({ message: "Server Error", error: error.message });
 	}
 };
+
+export const getRazorpayKey = async (req, res) => {
+    res.json({ key: process.env.RAZORPAY_KEY_ID });
+};

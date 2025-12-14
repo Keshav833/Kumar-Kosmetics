@@ -5,7 +5,7 @@ export const createOrder = async (req, res) => {
 	try {
 		console.log("createOrder req.user:", req.user);
 		console.log("createOrder req.body:", req.body);
-		const { items, totalAmount, address, paymentMethod } = req.body;
+		const { items, totalAmount, address, paymentMethod, couponCode, discountAmount } = req.body;
 
         // 1. Validate Stock
         for (const item of items) {
@@ -22,6 +22,8 @@ export const createOrder = async (req, res) => {
 			user: req.user._id,
 			items,
 			totalAmount,
+            discountAmount,
+            couponCode,
 			address,
 			paymentMethod,
             paymentStatus: paymentMethod === "COD" ? "Pending" : "Pending",

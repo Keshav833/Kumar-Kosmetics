@@ -7,11 +7,18 @@ import Footer from "@/components/layout/footer"
 import CartItems from "@/components/cart/cart-items"
 import CartSummary from "@/components/cart/cart-summary"
 import { Loader } from "lucide-react"
+import axiosInstance from "@/lib/axios"
+import { toast } from "react-hot-toast"
+import { useState } from "react"
 
 export default function Cart() {
   const { authUser, openAuthModal } = useAuthStore()
   const { cart, getCart, updateQuantity, removeFromCart, loading } = useCartStore()
   const navigate = useNavigate()
+  
+  const [couponCode, setCouponCode] = useState("");
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
+  const [discount, setDiscount] = useState(0);
 
   useEffect(() => {
     if (authUser) {
@@ -31,7 +38,13 @@ export default function Cart() {
     if (!authUser) {
       openAuthModal({ type: "checkout" })
     } else {
-      navigate("/checkout")
+      navigate("/checkout", { 
+        state: { 
+            couponCode: isCouponApplied ? couponCode : "", 
+            discount: discount,
+            isCouponApplied: isCouponApplied
+        } 
+      })
     }
   }
 
@@ -64,7 +77,16 @@ export default function Cart() {
               <CartItems items={cartItems} onUpdateQuantity={handleUpdateQuantity} onRemoveItem={handleRemoveItem} />
             </div>
             <aside className="lg:col-span-1">
-              <CartSummary items={cartItems} onCheckout={handleCheckout} />
+              <CartSummary 
+                items={cartItems} 
+                onCheckout={handleCheckout} 
+                couponCode={couponCode}
+                setCouponCode={setCouponCode}
+                isCouponApplied={isCouponApplied}
+                setIsCouponApplied={setIsCouponApplied}
+                discount={discount}
+                setDiscount={setDiscount}
+              />
             </aside>
           </div>
         </div>

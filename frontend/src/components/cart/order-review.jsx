@@ -1,4 +1,4 @@
-export default function OrderReview({ items, subtotal, tax, shipping, total }) {
+export default function OrderReview({ items, subtotal, tax, shipping, total, discount = 0 }) {
   return (
     <div className="bg-white rounded-2xl p-6 border border-border h-fit sticky top-24">
       <h2 className="text-xl font-semibold text-foreground mb-6">Order Review</h2>
@@ -33,12 +33,23 @@ export default function OrderReview({ items, subtotal, tax, shipping, total }) {
           <span className="text-muted-foreground">Shipping</span>
           <span className="text-foreground">₹{shipping}</span>
         </div>
+        {discount > 0 && (
+            <div className="flex justify-between text-sm text-green-600">
+                <span>Discount (Coupon)</span>
+                <span>-₹{discount}</span>
+            </div>
+        )}
       </div>
 
       {/* Total */}
       <div className="flex justify-between items-center pt-6">
         <span className="font-semibold text-foreground">Total</span>
-        <span className="text-2xl font-bold text-primary">₹{total}</span>
+        <div className="text-right">
+            {discount > 0 && (
+                <span className="block text-sm text-muted-foreground line-through">₹{total + discount}</span>
+            )}
+            <span className="text-2xl font-bold text-primary">₹{total}</span>
+        </div>
       </div>
     </div>
   )

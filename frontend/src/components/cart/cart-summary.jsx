@@ -1,6 +1,17 @@
 import { Link } from "react-router-dom"
+import axiosInstance from "@/lib/axios"
+import { toast } from "react-hot-toast"
 
-export default function CartSummary({ items, onCheckout }) {
+export default function CartSummary({ 
+    items, 
+    onCheckout, 
+    couponCode, 
+    setCouponCode, 
+    isCouponApplied, 
+    setIsCouponApplied, 
+    discount, 
+    setDiscount 
+}) {
   const inclusiveSubtotal = items.reduce((sum, item) => sum + ((item.product?.price || 0) * item.quantity), 0)
   const tax = Math.round(inclusiveSubtotal - (inclusiveSubtotal / 1.18))
   const subtotal = inclusiveSubtotal - tax
@@ -9,7 +20,31 @@ export default function CartSummary({ items, onCheckout }) {
   const standardShipping = totalQuantity * 50
   const shipping = inclusiveSubtotal > 1500 ? 0 : standardShipping
   
-  const total = inclusiveSubtotal + shipping
+  const total = inclusiveSubtotal + shipping - discount
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    try {
+        const res = await axiosInstance.post("/cart/validate-coupon", { code: couponCode });
+        if (res.data.valid) {
+            setIsCouponApplied(true);
+            if (res.data.type === 'free_delivery') {
+                if (shipping > 0) {
+                    setDiscount(shipping);
+                    toast.success(res.data.message);
+                } else {
+                    toast.success("Free delivery already applied on orders above ₹1500!");
+                    setDiscount(0);
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Coupon error:", error);
+        toast.error(error.response?.data?.message || "Invalid Coupon Code");
+        setIsCouponApplied(false);
+        setDiscount(0);
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-border h-fit sticky top-24">
@@ -31,6 +66,12 @@ export default function CartSummary({ items, onCheckout }) {
             {shipping === 0 ? 'Free' : `₹${shipping}`}
           </span>
         </div>
+        {discount > 0 && (
+            <div className="flex justify-between text-sm text-green-600">
+                <span>Discount (Coupon)</span>
+                <span>-₹{discount}</span>
+            </div>
+        )}
       </div>
 
       {shipping === 0 ? (
@@ -47,7 +88,12 @@ export default function CartSummary({ items, onCheckout }) {
       {/* Total */}
       <div className="flex justify-between mb-6 pt-4">
         <span className="text-lg font-semibold text-foreground">Total</span>
-        <span className="text-2xl font-bold text-primary">₹{total}</span>
+        <div className="text-right">
+            {discount > 0 && (
+                <span className="block text-sm text-muted-foreground line-through">₹{total + discount}</span>
+            )}
+            <span className="text-2xl font-bold text-primary">₹{total}</span>
+        </div>
       </div>
 
       {/* Promo Code */}
@@ -57,12 +103,24 @@ export default function CartSummary({ items, onCheckout }) {
           <input
             type="text"
             placeholder="Enter code"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value)}
+            disabled={isCouponApplied}
             className="flex-1 px-3 py-2 border border-border rounded-lg text-sm placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          <button className="px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-border transition-colors">
-            Apply
+          <button 
+            onClick={handleApplyCoupon}
+            disabled={isCouponApplied || !couponCode}
+            className="px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-border transition-colors disabled:opacity-50"
+          >
+            {isCouponApplied ? "Applied" : "Apply"}
           </button>
         </div>
+        {isCouponApplied && (
+            <p className="text-green-600 text-xs mt-2 flex items-center gap-1">
+                <span className="text-sm">✓</span> Coupon applied successfully!
+            </p>
+        )}
       </div>
 
       {/* Checkout Button */}
