@@ -66,6 +66,9 @@ const userSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        activeToken: {
+            type: String,
+        },
         skinProfile: {
             skinType: { type: String, default: "" },
             concerns: [String],

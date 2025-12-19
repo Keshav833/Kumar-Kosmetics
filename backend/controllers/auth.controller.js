@@ -1,4 +1,5 @@
 import { generateTokenAndSetCookie } from "../lib/generateToken.js";
+import jwt from "jsonwebtoken";
 import User from "../models/Users.model.js";
 import bcrypt from "bcryptjs";
 import { OAuth2Client } from "google-auth-library";
@@ -16,7 +17,10 @@ export const signup = async (req, res) => {
 			return res.status(400).json({ message: "User already exists" });
 		}
 		const user = await User.create({ name, email, password });
-		generateTokenAndSetCookie(user._id, res);
+		const token = generateTokenAndSetCookie(user._id, res, user.role);
+        
+        user.activeToken = token;
+        await user.save();
 
 		res.status(201).json({
 			_id: user._id,
@@ -53,7 +57,9 @@ export const login = async (req, res) => {
                 await adminUser.save();
             }
 
-            generateTokenAndSetCookie(adminUser._id, res);
+            const token = generateTokenAndSetCookie(adminUser._id, res, "admin");
+            adminUser.activeToken = token;
+            await adminUser.save();
             
             return res.json({
                 _id: adminUser._id,
@@ -67,7 +73,9 @@ export const login = async (req, res) => {
 		const user = await User.findOne({ email });
 
 		if (user && (await user.comparePassword(password))) {
-			generateTokenAndSetCookie(user._id, res);
+			const token = generateTokenAndSetCookie(user._id, res, user.role);
+            user.activeToken = token;
+            await user.save();
 
 			res.json({
 				_id: user._id,
@@ -87,6 +95,18 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
 	try {
+        const token = req.cookies.jwt;
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+                if (decoded && decoded.userId) {
+                    await User.findByIdAndUpdate(decoded.userId, { activeToken: null });
+                }
+            } catch (err) {
+                // Token invalid or expired, just ignore and clear cookie
+            }
+        }
+
 		res.cookie("jwt", "", {
 			maxAge: 0,
 		});
@@ -138,7 +158,9 @@ export const googleLogin = async (req, res) => {
             }
         }
 
-		generateTokenAndSetCookie(user._id, res);
+		const tokenJwt = generateTokenAndSetCookie(user._id, res, user.role);
+        user.activeToken = tokenJwt;
+        await user.save();
 
 		res.json({
 			_id: user._id,

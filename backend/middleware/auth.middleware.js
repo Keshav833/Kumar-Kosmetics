@@ -17,9 +17,15 @@ export const protectRoute = async (req, res, next) => {
 		
 		const user = await User.findById(decoded.userId).select("-password");
 
+
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
+
+        // Check if token matches the active session token
+        if (user.activeToken !== token) {
+            return res.status(401).json({ message: "Session expired or invalid. Please login again." });
+        }
 
 		req.user = user;
 
