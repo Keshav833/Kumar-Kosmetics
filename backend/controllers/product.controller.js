@@ -6,23 +6,27 @@ const ALLOWED_SKIN_CONCERNS = [
   "Breakouts",
   "Blackheads",
   "Large pores",
+  "Uneven texture",
   "Pigmentation",
   "Dark spots",
   "Uneven tone",
   "Dullness",
-  "Uneven texture",
   "Fine lines",
   "Wrinkles",
   "Loss of firmness",
+  "Dryness",
+  "Flakiness",
   "Redness",
   "Rosacea",
+  "Sensitivity",
   "Dark circles",
   "Puffiness"
 ];
 
+const ALLOWED_SKIN_TYPES = ["Oily", "Dry", "Combination", "Sensitive", "Normal", "All"];
+const ALLOWED_CATEGORIES = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "Toner", "Treatment"];
+
 const NORMALIZATION_MAP = {
-  "Sensitivity": "Redness",
-  "Dryness": "Dullness",
   "OilControl": "Large pores"
 };
 
@@ -262,6 +266,73 @@ export const bulkCreateProducts = async (req, res) => {
                 throw new Error(`Product with name "${productData.name}" already exists`);
             }
 
+            // Validate Category
+            if (!ALLOWED_CATEGORIES.includes(productData.category)) {
+                 errors.push({
+                    row: i + 1,
+                    productName: productData.name,
+                    field: "category",
+                    invalidValues: [productData.category],
+                    allowedValues: ALLOWED_CATEGORIES,
+                    message: `Invalid category: ${productData.category}`
+                });
+                failed++;
+                continue;
+            }
+
+            // Validate Skin Types
+            let skinTypes = Array.isArray(productData.skinType) ? productData.skinType : [];
+            const invalidSkinTypes = skinTypes.filter(t => !ALLOWED_SKIN_TYPES.includes(t));
+            if (invalidSkinTypes.length > 0) {
+                 errors.push({
+                    row: i + 1,
+                    productName: productData.name,
+                    field: "skinTypes",
+                    invalidValues: invalidSkinTypes,
+                    allowedValues: ALLOWED_SKIN_TYPES,
+                    message: `Invalid skin types: ${invalidSkinTypes.join(", ")}`
+                });
+                failed++;
+                continue;
+            }
+
+            // Validate Images
+             let images = Array.isArray(productData.images) ? productData.images : [];
+             const invalidImages = images.filter(url => !url.startsWith("http") || url.includes("example.com"));
+             if (invalidImages.length > 0) {
+                 errors.push({
+                    row: i + 1,
+                    productName: productData.name,
+                    field: "images",
+                    message: `Invalid images found (must be valid URL and not example.com): ${invalidImages.join(", ")}`
+                });
+                failed++;
+                continue;
+            }
+
+            // Validate Variants
+            let variants = Array.isArray(productData.variants) ? productData.variants : [];
+            let variantErrors = [];
+            variants.forEach((v, idx) => {
+                 if (!v.name || !v.stock || v.price === undefined) {
+                     variantErrors.push(`Variant ${idx + 1} missing required fields`);
+                 }
+                 if (v.image && (v.image.includes("example.com") || !v.image.startsWith("http"))) {
+                      variantErrors.push(`Variant ${idx + 1} has invalid image URL`);
+                 }
+            });
+
+            if (variantErrors.length > 0) {
+                 errors.push({
+                    row: i + 1,
+                    productName: productData.name,
+                    field: "variants",
+                    message: `Variant errors: ${variantErrors.join("; ")}`
+                });
+                failed++;
+                continue;
+            }
+
             // Validate and Normalize Skin Concerns
             let skinConcerns = Array.isArray(productData.skinConcerns) ? productData.skinConcerns : [];
             
@@ -287,8 +358,8 @@ export const bulkCreateProducts = async (req, res) => {
 
             const newProduct = new Product({
                 ...productData,
-                images: Array.isArray(productData.images) ? productData.images : [],
-                skinType: Array.isArray(productData.skinType) ? productData.skinType : [],
+                images: images,
+                skinType: skinTypes, // Use validated skin types
                 skinConcerns: skinConcerns, // Use normalized and validated concerns
                 allergyLabels: Array.isArray(productData.allergyLabels) ? productData.allergyLabels : [],
                 ingredients: Array.isArray(productData.ingredients) ? productData.ingredients : [],

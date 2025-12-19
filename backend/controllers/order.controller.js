@@ -88,3 +88,21 @@ export const updateOrderStatus = async (req, res) => {
         res.status(500).json({ message: "Server Error", error: error.message });
     }
 };
+
+// @desc    Get order by ID
+// @route   GET /api/orders/:id
+// @access  Private
+export const getOrderById = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).populate("user", "name email");
+
+        if (order) {
+            res.json(order);
+        } else {
+            res.status(404).json({ message: "Order not found" });
+        }
+    } catch (error) {
+        console.log("Error in getOrderById controller", error.message);
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+};

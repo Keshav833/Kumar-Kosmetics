@@ -104,7 +104,7 @@ export default function ContactPage() {
                   <h3 className="text-md font-semibold text-white">Email Us</h3>
                 </div>
                 <p className="text-blue-50 text-xs mb-1 font-medium">Our friendly team is here to help.</p>
-                <a href="mailto:korplz1408@gmail.com" className="text-white font-medium hover:underline text-sm">korplz1408@gmail.com</a>
+                <a href="mailto:korplz1408@gmail.com" className="text-white font-medium hover:underline text-sm">OfficialKumarKosmetics.com</a>
               </motion.div>
 
               <motion.div 
@@ -117,8 +117,8 @@ export default function ContactPage() {
                   <MapPin className="w-5 h-5" />
                   <h3 className="text-md font-semibold text-white">Visit Us</h3>
                 </div>
-                <p className="text-blue-50 text-xs mb-1 font-medium">Come say hello at our office headquarters.</p>
-                <p className="text-white font-medium text-sm">block 30, Serojani Nagar, New Delhi 110011</p>
+                <p className="text-blue-50 text-xs mb-1 font-medium">Come say hello at our Store.</p>
+                <p className="text-white font-medium text-sm">Ganpat Bazar, Bhaderwah, J&K </p>
               </motion.div>
 
               <motion.div 
@@ -132,7 +132,7 @@ export default function ContactPage() {
                   <h3 className="text-md font-semibold text-white">Call Us</h3>
                 </div>
                 <p className="text-blue-50 text-xs mb-1 font-medium">Mon - Fri: 9am - 6pm</p>
-                <a href="tel:+91-8130610431" className="text-white font-medium hover:underline text-sm">+91-8130610431</a>
+                <a href="tel:+91-8130610431" className="text-white font-medium hover:underline text-sm">+91 8130610431</a>
               </motion.div>
 
               <motion.div 

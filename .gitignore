@@ -1,2 +1,5 @@
 .env
 node_modules
+AUTH_GUIDE.md
+.env.local
+.env.development

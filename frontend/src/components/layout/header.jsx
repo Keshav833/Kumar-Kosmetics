@@ -90,11 +90,13 @@ export default function Header() {
       icon: <Search className={`w-5 h-5 ${iconColorClass}`} />,
       label: 'Search',
       onClick: () => setIsSearchOpen(true),
+      className: "bg-white/10 dark:bg-black/10 rounded-xl text-foreground"
     },
     {
       icon: <Heart className={`w-5 h-5 ${iconColorClass}`} />,
       label: 'Wishlist',
       onClick: () => navigate('/wishlist'),
+      className: "bg-white/10 dark:bg-black/10 rounded-xl text-foreground"
     },
     {
       icon: (
@@ -109,6 +111,7 @@ export default function Header() {
       ),
       label: 'Cart',
       onClick: () => navigate('/cart'),
+      className: "bg-white/10 dark:bg-black/10 rounded-xl text-foreground"
     },
     {
       icon: authUser?.avatar ? (
@@ -117,7 +120,7 @@ export default function Header() {
         <User className={`w-5 h-5 ${iconColorClass}`} />
       ),
       label: authUser ? '' : 'Login', // Hide label if logged in, as dropdown shows info
-      className: "group",
+      className: "group bg-white/10 dark:bg-black/10 rounded-xl text-foreground",
       onClick: () => {
         if (!authUser) {
            navigate('/login');

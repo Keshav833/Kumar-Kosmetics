@@ -9,14 +9,24 @@ const categories = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "To
 const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
 const skinConcerns = [
   "Acne",
+  "Breakouts",
+  "Blackheads",
+  "Large pores",
+  "Uneven texture",
   "Pigmentation",
-  "Dullness",
-  "Redness",
   "Dark spots",
+  "Uneven tone",
+  "Dullness",
   "Fine lines",
-  "Dehydration",
-  "Texture",
-  "Enlarged pores",
+  "Wrinkles",
+  "Loss of firmness",
+  "Dryness",
+  "Flakiness",
+  "Redness",
+  "Rosacea",
+  "Sensitivity",
+  "Dark circles",
+  "Puffiness"
 ];
 const allergyLabels = [
   "Paraben-free",
@@ -255,7 +265,7 @@ const AddProduct = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Price ($)</label>
+                  <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
                   <input
                     type="number"
                     name="price"
@@ -266,7 +276,7 @@ const AddProduct = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Discount Price ($)</label>
+                  <label className="block text-sm font-medium text-gray-700">Discount Price (₹)</label>
                   <input
                     type="number"
                     name="discountPrice"
@@ -451,7 +461,7 @@ const AddProduct = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Price ($)</label>
+                    <label className="block text-xs text-gray-500 mb-1">Price (₹)</label>
                     <input
                       type="number"
                       name="price"

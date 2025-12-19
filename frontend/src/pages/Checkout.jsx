@@ -18,7 +18,6 @@ export default function Checkout() {
 		city: "",
 		state: "",
 		pincode: "",
-		pincode: "",
 		phone: "",
 	});
 	const { cart, getCart, clearCart } = useCartStore();

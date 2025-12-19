@@ -7,6 +7,28 @@ import ProductFilters from "../components/product/product-filters"
 import ProductGrid from "../components/product/product-grid"
 import ProductCategoryCircles from "../components/product/product-category-circles"
 import { Grid, List, Loader, Search, X, Filter } from "lucide-react"
+import { motion } from "framer-motion"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5
+    }
+  }
+}
 
 export default function Products() {
   const [searchParams] = useSearchParams()
@@ -64,49 +86,52 @@ export default function Products() {
       <Header />
       
       
-      <div className="relative w-full h-screen">
+      {/* Hero Section */}
+      <section className="relative py-20 md:py-32 overflow-hidden min-h-[60vh] flex items-center justify-center">
         {/* Background Image */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 z-0">
           <img 
-            src="/product_Header.jpg" 
-            alt="Clean Conscious Clinical Skincare" 
-            className="w-full h-full object-cover"
+            src="/product_Hero.jpg" 
+            alt="Products Hero" 
+            className="w-full h-full object-cover grayscale-[20%]"
           />
-          {/* Overlay Gradient for consistency and readability */}
-          <div className="absolute inset-0  to-transparent"></div>
+          <div className="absolute inset-0 bg-white/75" />
         </div>
-
-        {/* Text Content Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24">
-          <style>{`
-            @keyframes slideInLeft {
-              from { opacity: 0; transform: translateX(-100px); }
-              to { opacity: 1; transform: translateX(0); }
-            }
-            .animate-slide-in-left {
-              animation: slideInLeft 1s ease-out forwards;
-              opacity: 0; /* Ensures it starts invisible */
-            }
-          `}</style>
-          <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-6xl  lg:text-7xl text-black mb-6 mt-10  " >
-              <span className="block drop-shadow-md animate-slide-in-left">Clean</span>
-              <span className="block drop-shadow-md animate-slide-in-left">Conscious</span>
-              <span className="block drop-shadow-md animate-slide-in-left">Clinical</span>
-              <span className="block font-thin opacity-90 animate-slide-in-left">Skincare</span>
-            </h1>
-            <p className="text-xl md:text-2xl font-sans w-1/2 text-black leading-relaxed max-w-2xl drop-shadow-sm animate-slide-in-left" style={{ animationDelay: '0.3s' }}>
-              <span className="font-extralight text-gray-600 w-1/2">
-                Unreservedly honest products that work, be kind to skin and the planet
-              </span>
-            
-              <span className="ml-2 px-2 py-1 text-3xl rounded-md italic font-['Bodoni_Moda'] text-gray-700" >
-                – no exceptions!  
-              </span>
-            </p>
-          </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none z-10" />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="text-center max-w-4xl mx-auto mb-10"
+          >
+            <motion.h1 
+              className="text-5xl md:text-7xl font-bold mb-6 tracking-tight bg-cover bg-center text-transparent"
+              style={{
+                backgroundImage: "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/product_Hero.jpg')",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                backgroundPosition: "center",
+                backgroundSize: "cover"
+              }}
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              Find Skincare That <br/> Fits Your Skin
+            </motion.h1>
+            <motion.p 
+              variants={itemVariants}
+              className="text-xl md:text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto"
+            >
+              Discover thoughtfully formulated products designed to
+              address your skin’s unique needs — from daily care to
+              targeted treatments.
+            </motion.p>
+          </motion.div>
         </div>
-      </div>
+      </section>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
