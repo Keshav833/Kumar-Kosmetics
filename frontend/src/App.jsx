@@ -25,6 +25,9 @@ import Profile from './pages/Profile'
 import Wishlist from "./pages/Wishlist";
 import OrderSuccess from "./pages/OrderSuccess";
 import BulkUploadProducts from "./pages/admin/BulkUploadProducts";
+import ReturnOrderPage from "./pages/ReturnOrderPage";
+import PrivacyPolicy from './pages/PolicyPage';
+import TermsPage from './pages/TermsPage';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -54,6 +57,9 @@ function AnimatedRoutes() {
         <Route path="/admin/messages" element={authUser?.role === "admin" ? <AdminContactMessages /> : <Navigate to="/" />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/" />} />
         <Route path="/wishlist" element={authUser ? <Wishlist /> : <Navigate to="/login" />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/order/:id/return" element={authUser ? <ReturnOrderPage /> : <Navigate to="/login" />} />
         <Route path="/order-success" element={<OrderSuccess />} />
       </Routes>
     </AnimatePresence>

@@ -53,6 +53,23 @@ export default function Admin() {
     }
   }, [currentSection]);
 
+  const [returns, setReturns] = useState([])
+
+  useEffect(() => {
+    const fetchReturns = async () => {
+      try {
+        const res = await axiosInstance.get("/returns/admin");
+        setReturns(res.data);
+      } catch (error) {
+        console.error("Error fetching returns:", error);
+        toast.error("Failed to fetch returns");
+      }
+    };
+    if (currentSection === "orders") {
+        fetchReturns();
+    }
+  }, [currentSection]);
+
   const [customers, setCustomers] = useState([])
 
   useEffect(() => {
@@ -79,7 +96,7 @@ export default function Admin() {
         <main className="flex-1 overflow-y-auto">
           {currentSection === "overview" && <DashboardOverview products={products} orders={orders} customers={customers} />}
           {currentSection === "products" && <ProductsManager products={products} setProducts={setProducts} />}
-          {currentSection === "orders" && <OrdersSection orders={orders} setOrders={setOrders} />}
+          {currentSection === "orders" && <OrdersSection orders={orders} setOrders={setOrders} returns={returns} />}
           {currentSection === "categories" && <CategoriesSection />}
           {currentSection === "customers" && <CustomersSection customers={customers} />}
           {currentSection === "messages" && <AdminContactMessages />}
