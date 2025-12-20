@@ -82,6 +82,10 @@ const productSchema = new mongoose.Schema(
         "Rosacea",
         "Dark circles",
         "Puffiness",
+        "Dryness",
+        "Dryness",
+        "Flakiness",
+        "Texture",
       ],
     },
     ingredients: {

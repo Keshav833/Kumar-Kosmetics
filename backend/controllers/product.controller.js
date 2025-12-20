@@ -27,12 +27,16 @@ const ALLOWED_SKIN_TYPES = ["Oily", "Dry", "Combination", "Sensitive", "Normal",
 const ALLOWED_CATEGORIES = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "Toner", "Treatment"];
 
 const NORMALIZATION_MAP = {
-  "OilControl": "Large pores"
+  "OilControl": "Large pores",
+  "Oiliness": "Large pores",
+  "Sensitivity": "Redness",
+  "DrySkin": "Flakiness",
+  "Texture": "Uneven texture"
 };
 
 export const createProduct = async (req, res) => {
   try {
-    const {
+    let {
       name,
       description,
       category,
@@ -85,8 +89,14 @@ export const createProduct = async (req, res) => {
           });
           variantImageUrl = uploadResponse.secure_url;
         }
+
         processedVariants.push({ ...variant, image: variantImageUrl });
       }
+    }
+
+    // Normalize Skin Concerns if present
+    if (skinConcerns && Array.isArray(skinConcerns)) {
+       skinConcerns = skinConcerns.map(c => NORMALIZATION_MAP[c] || c);
     }
 
     const newProduct = new Product({
@@ -154,7 +164,7 @@ export const getProductById = async (req, res) => {
 };
 export const updateProduct = async (req, res) => {
   try {
-    const {
+    let {
       name,
       description,
       category,
@@ -212,6 +222,11 @@ export const updateProduct = async (req, res) => {
             newVariants.push({ ...variant, image: variantImageUrl });
         }
         processedVariants = newVariants;
+    }
+    
+    // Normalize Skin Concerns if present in update
+    if (skinConcerns && Array.isArray(skinConcerns)) {
+       skinConcerns = skinConcerns.map(c => NORMALIZATION_MAP[c] || c);
     }
 
     product.name = name || product.name;

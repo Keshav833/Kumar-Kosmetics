@@ -3,6 +3,46 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+
+/* 3D helpers */
+.perspective-2500 {
+  perspective: 2500px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.translate-z-50 {
+  transform: translateZ(50px);
+}
+
+.translate-z-60 {
+  transform: translateZ(60px);
+}
+
+.translate-z-80 {
+  transform: translateZ(80px);
+}
+
+.translate-z-100 {
+  transform: translateZ(100px);
+}
+
+.translate-z-140 {
+  transform: translateZ(140px);
+}
+
+.translate-z-160 {
+  transform: translateZ(160px);
+}
+
+.translate-z-120 {
+  transform: translateZ(120px);
+}
+
+
 :root {
   /* Premium cosmetics color palette - sophisticated blue shades */
   --background: oklch(0.98 0 0);

@@ -2,10 +2,9 @@ import { ArrowLeft, Check, AlertTriangle, Star, Droplets, Sparkles, Sun, Waves, 
 import { Link } from "react-router-dom"
 import { useCartStore } from "@/store/useCartStore"
 import { useAuthStore } from "@/store/useAuthStore"
-import toast from "react-hot-toast"
 import { motion } from "framer-motion"
 
-export default function RecommendedProducts({ analysis, onReset }) {
+export default function RecommendedProducts({ analysis, onReset, isEmbedded = false }) {
   const { addToCart } = useCartStore()
   const { authUser, openAuthModal } = useAuthStore()
 
@@ -35,57 +34,92 @@ export default function RecommendedProducts({ analysis, onReset }) {
     "Smile": Smile
   };
 
+
+
+  const skinImages = {
+      "Oily": "/OilySkin.jpg",
+      "Dry": "/DrySkin.jpg",
+      "Combination": "/combinationskin.jpg",
+      "Normal": "/normalSkin.jpg",
+      "Sensitive": "/sensitveSkin.jpg"
+  };
+
+  const SkinImage = skinImages[profile.skinType] || NormalSkinImg;
+
   return (
-    <div className="min-h-screen bg-gray-50/30 pb-20">
+    <div className={`min-h-screen ${isEmbedded ? 'bg-transparent pb-0' : 'bg-gray-50/30 pb-20'}`}>
       {/* 1. Skin Profile Summary (Hero) */}
-      <section className="bg-white border-b border-gray-200 pt-12 pb-8 px-4">
-        <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-blue-900">
-                    Your Skin Profile
-                </h1>
-                <div className="text-sm text-muted-foreground">#{profile._id?.slice(-6).toUpperCase()}</div>
-            </div>
+      <section className={`${isEmbedded ? 'pt-0 pb-6 px-0' : 'bg-white border-b border-gray-200 pt-12 pb-8 px-4'}`}>
+        <div className={`mx-auto ${isEmbedded ? 'max-w-full' : 'max-w-4xl'}`}>
+            {!isEmbedded && (
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold text-blue-900">
+                        Your Skin Profile
+                    </h1>
+                    <div className="text-sm text-muted-foreground">#{profile._id?.slice(-6).toUpperCase()}</div>
+                </div>
+            )}
             
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                    <div className="flex-1">
-                        <div className="text-sm text-muted-foreground mb-1">Detected Skin Type</div>
-                        <div className="text-3xl font-bold text-primary mb-2">{profile.skinType}</div>
-                        {skinTypeInfo?.description && (
-                            <p className="text-gray-600 text-sm mb-2">{skinTypeInfo.description}</p>
-                        )}
-                        {skinTypeInfo?.careFocus && (
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
-                                <Sparkles className="w-3 h-3" /> Focus: {skinTypeInfo.careFocus}
-                            </div>
-                        )}
-                    </div>
-                    
-                    <div className="flex-1">
-                        <div className="text-sm text-muted-foreground mb-2">Primary Concerns</div>
-                        <div className="flex flex-wrap gap-2">
-                            {profile.concerns.map(c => (
-                                <span key={c} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                    {c}
-                                </span>
-                            ))}
+            <div className={`bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm ${isEmbedded ? '' : 'p-6'}`}>
+                <div className="flex flex-col md:flex-row">
+                    {/* Image Section */}
+                    <div className="w-full md:w-1/3 rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 relative min-h-[200px] md:min-h-full">
+                        <img 
+                            src={SkinImage} 
+                            alt={`${profile.skinType} Skin`} 
+                            className="absolute rounded-2xl inset-0 w-full h-full object-cover mix-blend-multiply opacity-90"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent" />
+                        <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/50 text-center">
+                            <span className="font-bold text-orange-400 block">{profile.skinType} Skin</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
-                         {profile.skinType === "Sensitive" || profile.history?.reactions ? (
-                            <><AlertTriangle className="w-4 h-4 text-amber-500" /> <span className="text-sm font-medium">Sensitive</span></>
-                        ) : (
-                            <><Check className="w-4 h-4 text-green-500" /> <span className="text-sm font-medium">Resilient</span></>
-                        )}
+                    {/* Content Section */}
+                    <div className="w-full md:w-2/3 p-6 md:p-8 flex flex-col justify-center">
+                        <div className="flex flex-col gap-6">
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="text-sm text-blue-900 font-medium uppercase tracking-wider">Analysis Result</div>
+                                    <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                                        {profile.skinType === "Sensitive" || profile.history?.reactions ? (
+                                            <><AlertTriangle className="w-3 h-3 text-amber-500" /> <span className="text-xs font-bold text-amber-700">Sensitive</span></>
+                                        ) : (
+                                            <><Check className="w-3 h-3 text-green-500" /> <span className="text-xs font-bold text-green-700">Resilient</span></>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                {skinTypeInfo?.description && (
+                                    <p className="text-gray-600 text-sm leading-relaxed mb-4">{skinTypeInfo.description}</p>
+                                )}
+                                
+                                {skinTypeInfo?.careFocus && (
+                                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                                        <Sparkles className="w-3.5 h-3.5" /> 
+                                        <span>Focus: <span className="font-bold">{skinTypeInfo.careFocus}</span></span>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div>
+                                <div className="text-xs font-bold text-blue-900/80 uppercase tracking-wider mb-2">Primary Concerns</div>
+                                <div className="flex flex-wrap gap-2">
+                                    {profile.concerns.map(c => (
+                                        <span key={c} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                                            {c}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 py-12 space-y-12">
+      <div className={`mx-auto space-y-8 ${isEmbedded ? 'max-w-full px-0 py-4' : 'max-w-4xl px-4 py-12'}`}>
         
         {/* 2. Key Insights (Limit to 3) */}
         <section>
@@ -139,7 +173,6 @@ export default function RecommendedProducts({ analysis, onReset }) {
                                         </div>
                                         <div>
                                             <div className="font-medium text-foreground group-hover:text-primary transition-colors">{step.product.name}</div>
-                                            <div className="text-xs text-green-600 font-medium">{step.product.matchScore}% Match</div>
                                         </div>
                                     </Link>
                                 ) : (
@@ -150,9 +183,10 @@ export default function RecommendedProducts({ analysis, onReset }) {
                             {step.product && (
                                 <button 
                                     onClick={(e) => handleAddToCart(e, step.product)}
-                                    className="w-full sm:w-auto px-4 py-2 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
+                                    className="p-2.5 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors shadow-sm"
+                                    title="Add to Cart"
                                 >
-                                    Add
+                                    <ShoppingBag className="w-4 h-4" />
                                 </button>
                             )}
                         </div>
@@ -176,9 +210,6 @@ export default function RecommendedProducts({ analysis, onReset }) {
                                     alt={product.name}
                                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                                 />
-                                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm border border-green-100">
-                                    <span className="text-xs font-bold text-green-700">{product.matchScore}%</span>
-                                </div>
                             </div>
                             <div className="p-4">
                                 <div className="text-xs text-muted-foreground mb-1">{product.category}</div>

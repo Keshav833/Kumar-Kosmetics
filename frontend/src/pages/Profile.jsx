@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
 import { useAuthStore } from "@/store/useAuthStore"
-import { User, Package, MapPin, CreditCard, Plus, Trash2, Edit2, Camera } from "lucide-react"
+import { User, Package, MapPin, CreditCard, Plus, Trash2, Edit2, Camera, Sparkles, Loader } from "lucide-react"
 import ChangePassword from "@/components/profile/ChangePassword"
 import ProfileSidebar from "@/components/profile/ProfileSidebar"
+import axiosInstance from "@/lib/axios"
+import RecommendedProducts from "@/components/product/recommended-products"
 
 export default function Profile() {
   const { authUser, logout, updateProfile, addAddress, deleteAddress, addUPI, deleteUPI, getMyOrders } = useAuthStore()
@@ -12,6 +14,8 @@ export default function Profile() {
   const [isAddingUPI, setIsAddingUPI] = useState(false)
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [skinAnalysis, setSkinAnalysis] = useState(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
   // Form States
   const [addressForm, setAddressForm] = useState({
@@ -30,8 +34,23 @@ export default function Profile() {
     }
   }, [activeTab, getMyOrders])
 
+  useEffect(() => {
+    if (activeTab === "skin-analysis" && !skinAnalysis) {
+        setLoadingAnalysis(true);
+        axiosInstance.get("/skin-analysis/profile")
+            .then(res => {
+                if (res.data && res.data.recommendations) {
+                    setSkinAnalysis(res.data);
+                }
+            })
+            .catch(err => console.error("Error fetching analysis", err))
+            .finally(() => setLoadingAnalysis(false));
+    }
+  }, [activeTab, skinAnalysis]);
+
   const tabs = [
     { id: "orders", label: "My Orders", icon: Package },
+    { id: "skin-analysis", label: "Skin Analysis", icon: Sparkles },
     { id: "addresses", label: "Saved Addresses", icon: MapPin },
     { id: "payment", label: "Payment Methods", icon: CreditCard },
     { id: "account", label: "Account Details", icon: User },
@@ -414,6 +433,34 @@ export default function Profile() {
                   )}
               </div>
             )}
+            {/* SKIN ANALYSIS */}
+            {activeTab === "skin-analysis" && (
+                <div>
+                    {loadingAnalysis ? (
+                        <div className="flex justify-center py-20">
+                            <Loader className="w-10 h-10 animate-spin text-indigo-600" />
+                        </div>
+                    ) : skinAnalysis ? (
+                        <RecommendedProducts 
+                            analysis={skinAnalysis} 
+                            onReset={() => window.location.href = "/skin-analyzer"} 
+                            isEmbedded={true} 
+                        />
+                    ) : (
+                        <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
+                            <Sparkles className="w-16 h-16 text-indigo-200 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Analysis Found</h3>
+                            <p className="text-gray-500 mb-6 max-w-md mx-auto">Take our AI skin quiz to discover your personalized skincare routine and product recommendations.</p>
+                            <button 
+                                onClick={() => window.location.href = "/skin-analyzer"}
+                                className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+                            >
+                                Take Skin Quiz
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
           </div>
         </main>
       </div>
@@ -422,3 +469,4 @@ export default function Profile() {
     </div>
   )
 }
+

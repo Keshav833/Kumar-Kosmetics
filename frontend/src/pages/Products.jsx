@@ -46,6 +46,13 @@ export default function Products() {
 
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "")
+    const categoryParam = searchParams.get("category")
+    if (categoryParam) {
+      setFilters(prev => ({
+        ...prev,
+        category: [categoryParam]
+      }))
+    }
   }, [searchParams])
 
   const productsSectionRef = useRef(null)

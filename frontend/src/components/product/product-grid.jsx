@@ -70,6 +70,20 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
     return true
   })
 
+  if (filteredProducts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="bg-gray-100 p-6 rounded-full mb-4">
+          <Heart className="w-10 h-10 text-gray-400" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">No Products Found</h3>
+        <p className="text-gray-500 max-w-sm">
+          We couldn't find any products matching your filters. Try adjusting your search or filter criteria.
+        </p>
+      </div>
+    )
+  }
+
   if (viewType === "grid") {
     return (
       <>

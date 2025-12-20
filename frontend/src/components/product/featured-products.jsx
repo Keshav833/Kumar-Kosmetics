@@ -1,37 +1,17 @@
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
-import axios from "../../lib/axios"
 import { ArrowRight } from "lucide-react"
+import ThreeDProductCard from "./ThreeDProductCard"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
 
 export default function FeaturedProducts() {
-  const [products, setProducts] = useState([])
   const sectionRef = useRef(null)
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get("/products")
-        // Get first 4 products, preferably featured ones if marked, otherwise just first 4
-        // Assuming backend returns { products: [] }
-        const allProducts = res.data.products || []
-        const featured = allProducts.filter(p => p.featured)
-        // If we have featured products, use them, otherwise use generic slice
-        const displayProducts = featured.length > 0 ? featured.slice(0, 4) : allProducts.slice(0, 4)
-        setProducts(displayProducts)
-      } catch (error) {
-        console.error("Error fetching featured products:", error)
-      }
-    }
-
-    fetchProducts()
-  }, [])
-
-  useEffect(() => {
-    if (products.length > 0 && sectionRef.current) {
+    if (sectionRef.current) {
         const ctx = gsap.context(() => {
             // Header animation
             gsap.from(".featured-header > *", {
@@ -75,13 +55,11 @@ export default function FeaturedProducts() {
         }, sectionRef)
         return () => ctx.revert()
     }
-  }, [products])
-
-  if (products.length === 0) return null;
+  }, [])
 
   return (
-    <section ref={sectionRef} className="max-w-7xl mx-auto px-4 py-16 bg-gradient-to-b from-primary/2 to-background">
-      <div className="text-center mb-12 featured-header">
+    <section ref={sectionRef} className="max-w-7xl mx-auto px-4 py-26 bg-gradient-to-b from-primary/2 to-background">
+      <div className="text-center mb-16 featured-header">
         <style>{`
           @keyframes arrow-slide {
             0% { transform: translateX(0); opacity: 1; }
@@ -100,48 +78,39 @@ export default function FeaturedProducts() {
         <p className="text-muted-foreground">Handpicked products loved by thousands</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 featured-grid">
-        {products.map((product) => (
-          <Link
-            key={product._id}
-            to={`/products/${product._id}`}
-            className="bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer block group featured-card"
-          >
-            {/* Image */}
-            <div className="relative h-48 bg-gray-50 overflow-hidden p-4">
-              <img
-                src={product.images?.[0] || "/placeholder.svg"}
-                alt={product.name}
-                className="w-full h-full object-contain hover:scale-110 transition-transform duration-300 mix-blend-multiply"
-              />
-              {/* Badge - could be based on newness or stock */}
-              {product.stock < 5 && (
-                <div className="absolute top-3 right-3 bg-red-500 text-white text-xs px-3 py-1 rounded-full font-medium z-10">
-                  Low Stock
-                </div>
-              )}
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              <h3 className="text-sm font-medium text-foreground mb-2 truncate group-hover:text-primary transition-colors">{product.name}</h3>
-
-              {/* Rating Placeholder - real rating would come from reviews */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs text-primary">★ {4.5}</span>
-                <span className="text-xs text-muted-foreground">(120+)</span>
-              </div>
-
-              {/* Price and Button */}
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-foreground">₹{product.price}</span>
-                <button className="bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity">
-                  View
-                </button>
-              </div>
-            </div>
-          </Link>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 py-16 gap-16 featured-grid justify-items-center">
+        <ThreeDProductCard 
+          title="Sun Screen" 
+          price="899.00" 
+          image="/sunscreen.png" 
+          bgImage="/sunscreen.jpg" 
+          category="Sunscreen"
+          className="featured-card"
+        />
+        <ThreeDProductCard 
+          title="Toner" 
+          price="699.00" 
+          image="/toner.png" 
+          bgImage="/toner.jpg" 
+          category="Toner"
+          className="featured-card"
+        />
+        <ThreeDProductCard 
+          title="Serum" 
+          price="999.00" 
+          image="/serum.png" 
+          bgImage="/serum.jpg" 
+          category="Serum"
+          className="featured-card"
+        />
+        <ThreeDProductCard 
+          title="Moisturiser" 
+          price="499.00" 
+          image="/moisturiser.png" 
+          bgImage="/moisturiser.jpg" 
+          category="Moisturizer"
+          className="featured-card"
+        />
       </div>
       <div className="mt-12 text-center view-all-btn">
   <Link
