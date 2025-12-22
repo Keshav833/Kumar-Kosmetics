@@ -1,12 +1,13 @@
+import { useState, useMemo } from "react"
 import { ArrowLeft, Check, AlertTriangle, Star, Droplets, Sparkles, Sun, Waves, SprayCan, Clock, ShieldAlert, FlaskConical, Download, ShoppingBag, Smile, Lightbulb } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useCartStore } from "@/store/useCartStore"
 import { useAuthStore } from "@/store/useAuthStore"
-import { motion } from "framer-motion"
 
 export default function RecommendedProducts({ analysis, onReset, isEmbedded = false }) {
   const { addToCart } = useCartStore()
   const { authUser, openAuthModal } = useAuthStore()
+  const [activeCategory, setActiveCategory] = useState("All")
 
   if (!analysis) return null
 
@@ -195,91 +196,155 @@ export default function RecommendedProducts({ analysis, onReset, isEmbedded = fa
             </div>
         </section>
 
-        {/* 4. Products Grid */}
+        {/* 4. Products Sliders with Tabs */}
         <section>
-            <h2 className="text-xl font-bold text-blue-900 mb-6 flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 text-primary" /> Top Recommendations
-            </h2>
+            <div className=" md:items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-blue-900 flex items-center gap-2 md:mb-6">
+                    <ShoppingBag className="w-5 h-5 text-primary" /> Top Recommendations
+                </h2>
+                
+                {/* Category Tabs */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+                    {(() => {
+                         // Logic to get categories for tabs
+                         const cats = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+                         const availableCats = new Set();
+                         recommendations.forEach(p => {
+                             const pCat = (p.category || "").toLowerCase();
+                             const mainCat = cats.find(c => pCat.includes(c.toLowerCase()));
+                             availableCats.add(mainCat || p.category || "Other");
+                         });
+                         
+                         const sortedCats = Array.from(availableCats).sort((a, b) => {
+                             const idxA = cats.findIndex(c => a.toLowerCase().includes(c.toLowerCase()));
+                             const idxB = cats.findIndex(c => b.toLowerCase().includes(c.toLowerCase()));
+                             if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                             if (idxA !== -1) return -1;
+                             if (idxB !== -1) return 1;
+                             return a.localeCompare(b);
+                         });
+
+                         return ["All", ...sortedCats].map(cat => (
+                             <button
+                                 key={cat}
+                                 onClick={() => setActiveCategory(cat)}
+                                 className={`
+                                     px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200
+                                     ${activeCategory === cat 
+                                         ? 'bg-blue-900 text-white shadow-md' 
+                                         : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                                     }
+                                 `}
+                             >
+                                 {cat}
+                             </button>
+                         ));
+                    })()}
+                </div>
+            </div>
             
+            {/* Horizontal Options */}
+            <div className="space-y-10">
             {(() => {
-                // Group products by category
+                // Determine groups
                 const groups = {};
                 const cats = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
                 
                 recommendations.forEach(product => {
-                    // Fuzzy match product category to one of our main types
-                    // If product.description or category contains "Cleanser", put it in Cleanser group.
                     const pCat = (product.category || "").toLowerCase();
                     const mainCat = cats.find(c => pCat.includes(c.toLowerCase()));
-                    
                     const groupKey = mainCat || product.category || "Other";
                     
                     if (!groups[groupKey]) groups[groupKey] = [];
                     groups[groupKey].push(product);
                 });
 
-                // Get categories present in groups, sorting by our preferred order if found
-                const presentCats = Object.keys(groups).sort((a, b) => {
+                // Filter based on activeCategory
+                let categoriesToShow = Object.keys(groups);
+                if (activeCategory !== "All") {
+                    categoriesToShow = categoriesToShow.filter(c => c === activeCategory);
+                }
+
+                // Sort categories
+                categoriesToShow.sort((a, b) => {
                     const idxA = cats.findIndex(c => a.toLowerCase().includes(c.toLowerCase()));
                     const idxB = cats.findIndex(c => b.toLowerCase().includes(c.toLowerCase()));
-                    // If both known, sort by index. If one unknown, put at end.
                     if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                     if (idxA !== -1) return -1;
                     if (idxB !== -1) return 1;
                     return a.localeCompare(b);
                 });
 
-                return presentCats.map(category => (
-                    <div key={category} className="mb-10">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4 px-1">{category}</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {groups[category].map((product) => (
-                                <Link key={product._id} to={`/products/${product._id}`}>
-                                    <div className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
-                                        <div className="relative h-48 bg-gray-50 p-4 flex items-center justify-center">
-                                            {/* Match Badge */}
-                                            {product.matchScore && (
-                                                <div className="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-                                                    <Sparkles className="w-3 h-3" />
-                                                    {product.matchScore}% Match
-                                                </div>
-                                            )}
-                                            <img
-                                                src={product.images?.[0] || "/placeholder.svg"}
-                                                alt={product.name}
-                                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                                            />
-                                        </div>
-                                        <div className="p-4">
-                                            <div className="text-xs text-muted-foreground mb-1">{product.category}</div>
-                                            <h3 className="font-medium text-foreground mb-1 line-clamp-1">{product.name}</h3>
-                                            
-                                            {/* Benefits / Reasons */}
-                                            {product.matchReasons && product.matchReasons.length > 0 && (
-                                                <div className="mb-3">
-                                                    <p className="text-[10px] text-indigo-600 font-medium bg-indigo-50 inline-block px-1.5 py-0.5 rounded">
-                                                        {product.matchReasons[0]}
-                                                    </p>
-                                                </div>
-                                            )}
+                if (categoriesToShow.length === 0) {
+                   return <div className="text-center py-10 text-gray-500">No products found in this category.</div>;
+                }
 
-                                            <div className="flex items-center justify-between mt-auto">
-                                                <span className="font-semibold">₹{product.price}</span>
-                                                <button
-                                                    onClick={(e) => handleAddToCart(e, product)}
-                                                    className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
-                                                >
-                                                    <ShoppingBag className="w-4 h-4" />
-                                                </button>
+                return categoriesToShow.map(category => (
+                    <div key={category} className="group/section">
+                        <div className="flex items-center justify-between mb-4 px-1">
+                            <h3 className="text-lg font-bold text-gray-800">{category}</h3>
+                            <div className="hidden md:flex gap-2 opacity-0 group-hover/section:opacity-100 transition-opacity">
+                                {/* Optional: could add prev/next buttons here if we implement scroll refs */}
+                            </div>
+                        </div>
+                        
+                        {/* Horizontal Slider Area */}
+                        <div className="flex gap-4 overflow-x-auto pb-6 snap-x snap-mandatory px-1 -mx-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                            {groups[category].map((product) => (
+                                <div key={product._id} className="min-w-[280px] w-[280px] snap-center">
+                                    <Link to={`/products/${product._id}`} className="block h-full">
+                                        <div className="group h-full bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-300 flex flex-col">
+                                            <div className="relative aspect-[4/5] bg-gray-50 p-6 flex items-center justify-center overflow-hidden">
+                                                {/* Match Badge */}
+                                                {product.matchScore && (
+                                                    <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1 border border-indigo-100">
+                                                        <Sparkles className="w-3 h-3" />
+                                                        {product.matchScore}%
+                                                    </div>
+                                                )}
+                                                <img
+                                                    src={product.images?.[0] || "/placeholder.svg"}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                            </div>
+                                            
+                                            <div className="p-4 flex flex-col flex-grow">
+                                                <div className="text-xs font-semibold text-blue-600 mb-1 uppercase tracking-wider">{product.category}</div>
+                                                <h3 className="font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-blue-700 transition-colors">{product.name}</h3>
+                                                
+                                                {/* Benefits / Reasons */}
+                                                <div className="min-h-[24px] mb-3">
+                                                    {product.matchReasons && product.matchReasons.length > 0 && (
+                                                        <span className="text-[10px] leading-tight text-gray-500 line-clamp-1">
+                                                            Suitable for your {profile.skinType} skin
+                                                        </span>
+                                                    )}
+                                                </div>
+    
+                                                <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                                                    <span className="font-bold text-lg text-gray-900">₹{product.price}</span>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault(); 
+                                                            handleAddToCart(e, product);
+                                                        }}
+                                                        className="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-900 rounded-full hover:bg-blue-900 hover:text-white transition-all duration-300 shadow-sm"
+                                                        title="Add to Cart"
+                                                    >
+                                                        <ShoppingBag className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </Link>
+                                    </Link>
+                                </div>
                             ))}
                         </div>
                     </div>
                 ));
             })()}
+            </div>
         </section>
 
         {/* 5. Retake Quiz Button */}
