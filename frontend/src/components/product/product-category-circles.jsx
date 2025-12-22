@@ -5,7 +5,7 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
   const categories = [
     { name: "Serum", image: "/serum.jpg" },
     { name: "Cleanser", image: "/Cleanser.jpg" },
-    { name: "Moisturiser", image: "/moisturiser.jpg" },
+    { name: "Moisturizer", image: "/moisturiser.jpg" },
     { name: "Mask", image: "/mask.jpg" },
     { name: "Toner", image: "/toner.jpg" },
     { name: "Treatment", image: "/treatment.jpg" },
@@ -18,6 +18,7 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
     // If clicking a new category, select only that one (replace current selection).
     const isSelected = filters.category.includes(categoryName);
     const newCategories = isSelected ? [] : [categoryName];
+      
     setFilters({ ...filters, category: newCategories });
   };
 
@@ -30,12 +31,22 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
         logoHeight={128} // Approx height for the circle container including padding
         gap={50}
         pauseOnHover={true}
-        renderItem={(cat) => {
+        renderItem={(cat, key) => {
           const isSelected = filters.category.includes(cat.name);
+          // Check if this is a "duplicate" copy created by LogoLoop (copyIndex > 0)
+          // key format is usually "copyIndex-itemIndex" e.g. "0-1" or "1-1"
+          const isDuplicate = key && key.toString().split('-')[0] !== '0';
+
+          // Use 'div' for duplicates to prevent keyboard focus (fixing aria-hidden error)
+          // while keeping mouse interactivity.
+          const Component = isDuplicate ? 'div' : 'button';
+
           return (
-            <button
+            <Component
               onClick={() => handleCategoryClick(cat.name)}
-              className="flex flex-col items-center gap-3 m-2 group/btn focus:outline-none"
+              className="flex flex-col items-center gap-3 m-2 group/btn focus:outline-none cursor-pointer"
+              role="button"
+              tabIndex={isDuplicate ? -1 : 0}
             >
               <div 
                 className={`
@@ -60,7 +71,7 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
               >
                 {cat.name}
               </span>
-            </button>
+            </Component>
           );
         }}
       />

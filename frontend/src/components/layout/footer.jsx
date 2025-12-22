@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div className="ml-4">
-            <img src="/whiteKumarKosmetics.png" alt="Kumar Kosmetics" className="h-14 w-auto mb-4 " />
+            <img src="/darkKumarKosmetics.png " alt="Kumar Kosmetics" className="h-14 w-auto mb-4 opacity-60 hover:opacity-90 transition-opacity duration-300" />
             <p className="text-sm opacity-60 hover:opacity-90 transition-opacity duration-300">Premium skincare that understands you.</p>
           </div>
 

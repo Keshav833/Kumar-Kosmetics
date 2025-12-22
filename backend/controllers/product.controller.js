@@ -133,8 +133,83 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
-    res.json({ products });
+    // 1️⃣ Extract Query Params
+    console.log("getAllProducts Query Params:", req.query); // DEBUG: Check incoming params
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    const search = req.query.search || "";
+    const category = req.query.category;
+    const skinType = req.query.skinType;
+    const concern = req.query.concern;
+    
+    // Additional price filters not in snippet but useful
+    const minPrice = req.query.minPrice;
+    const maxPrice = req.query.maxPrice;
+
+    let sortBy = req.query.sortBy || "createdAt";
+    let order = req.query.order === "asc" ? 1 : -1;
+
+    // 2️⃣ Build Filter Query (THIS IS THE CORE)
+    const query = {};
+
+    // Search by name
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    // Filter by category
+    if (category) {
+        // Handle array or string
+        query.category = Array.isArray(category) ? { $in: category } : category;
+    }
+
+    // Filter by skin type (array field in DB)
+    if (skinType) {
+        // If string: finds docs where skinType array contains the string
+        // If array: find docs where skinType array contains ANY of the provided strings ($in)
+        query.skinType = Array.isArray(skinType) ? { $in: skinType } : skinType;
+    }
+
+    // Filter by skin concern (array field in DB)
+    if (concern) {
+        query.skinConcerns = Array.isArray(concern) ? { $in: concern } : concern;
+    }
+
+    // Price Filter
+    if (minPrice || maxPrice) {
+        query.price = {};
+        if (minPrice) query.price.$gte = Number(minPrice);
+        if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // 3️⃣ Secure Sorting (Whitelist Only)
+    // Never trust query params blindly.
+    const allowedSortFields = ["name", "price", "stock", "createdAt"];
+
+    if (!allowedSortFields.includes(sortBy)) {
+      sortBy = "createdAt";
+    }
+
+    const sortOptions = { [sortBy]: order };
+
+    // 4️⃣ Final Query (THIS IS THE PAYOFF)
+    // Filters define the dataset. Pagination slices the dataset.
+    const products = await Product.find(query)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments(query);
+
+    res.json({
+      products,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      totalProducts
+    });
+
   } catch (error) {
     console.error("Error in getAllProducts controller", error.message);
     res.status(500).json({ message: "Server Error", error: error.message });

@@ -6,7 +6,7 @@ import Footer from "../components/layout/footer"
 import ProductFilters from "../components/product/product-filters"
 import ProductGrid from "../components/product/product-grid"
 import ProductCategoryCircles from "../components/product/product-category-circles"
-import { Grid, List, Loader, Search, X, Filter } from "lucide-react"
+import { Grid, List, Loader, Search, X, Filter, ChevronDown } from "lucide-react"
 import { motion } from "framer-motion"
 
 const containerVariants = {
@@ -30,12 +30,18 @@ const itemVariants = {
   }
 }
 
+import toast from "react-hot-toast"
+
 export default function Products() {
   const [searchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [viewType, setViewType] = useState("grid")
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "")
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [order, setOrder] = useState("desc");
   const [filters, setFilters] = useState({
     skinType: [],
     category: [],
@@ -44,11 +50,20 @@ export default function Products() {
   })
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
+  const handleSetFilters = (newFilters) => {
+    setFilters(newFilters);
+    setPage(1);
+  };
+
   useEffect(() => {
-    setSearchQuery(searchParams.get("q") || "")
+    const q = searchParams.get("q") || "";
+    setSearchQuery(q);
+    // If URL query changes, we should reset page
+    if(q !== searchQuery) setPage(1);
+
     const categoryParam = searchParams.get("category")
     if (categoryParam) {
-      setFilters(prev => ({
+      handleSetFilters(prev => ({
         ...prev,
         category: [categoryParam]
       }))
@@ -67,26 +82,55 @@ export default function Products() {
     }
   }, [searchQuery])
 
+  // Reset page logic is now handled in filter setters
+  // This useEffect is removed to prevent double-fetchingrace conditions.
+
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const res = await axios.get("/products")
+        // Construct query params manually to ensure arrays are handled correctly
+        // (axios default serialization might use brackets like category[] which backend might not expect depending on config)
+        const params = new URLSearchParams();
+        
+        params.append("page", page);
+        params.append("limit", 12);
+        if (searchQuery) params.append("search", searchQuery);
+        if (filters.priceRange[0] !== undefined) params.append("minPrice", filters.priceRange[0]);
+        if (filters.priceRange[1] !== undefined) params.append("maxPrice", filters.priceRange[1]);
+        if (sortBy) params.append("sortBy", sortBy);
+        if (order) params.append("order", order);
+
+        // Add array filters
+        filters.category.forEach(cat => params.append("category", cat));
+        filters.skinType.forEach(type => params.append("skinType", type));
+        filters.concern.forEach(c => params.append("concern", c));
+
+        const res = await axios.get(`/products?${params.toString()}`)
         setProducts(res.data.products)
+        setTotalPages(res.data.totalPages)
       } catch (error) {
         console.error("Error fetching products:", error)
+        toast.error("Failed to load products");
       } finally {
         setLoading(false)
+        if (productsSectionRef.current && page > 1) {
+          const offsetTop = productsSectionRef.current.offsetTop - 100;
+          window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        }
       }
     }
 
-    fetchProducts()
-  }, [])
+    // Debounce search slightly if typing? For now direct dependency.
+    const timeoutId = setTimeout(() => {
+        fetchProducts();
+    }, 300); // Simple debounce for safety
 
-  // Filter by search query first
-  const searchedProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+    return () => clearTimeout(timeoutId);
+  }, [page, filters, searchQuery, sortBy, order])
+
+  // removed searchedProducts logic, using products directly
+  const displayProducts = products;
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -142,12 +186,12 @@ export default function Products() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <ProductCategoryCircles filters={filters} setFilters={setFilters} />
+        <ProductCategoryCircles filters={filters} setFilters={handleSetFilters} />
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar - Sticky (Desktop) */}
           <div className="hidden lg:block w-64 flex-shrink-0">
-            <ProductFilters filters={filters} setFilters={setFilters} />
+            <ProductFilters filters={filters} setFilters={handleSetFilters} />
           </div>
 
           {/* Main Content */}
@@ -158,6 +202,25 @@ export default function Products() {
               
               {/* View Controls & Count */}
               <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
+                {/* Sort Dropdown */}
+                <div className="relative group">
+                    <select 
+                        value={`${sortBy}-${order}`}
+                        onChange={(e) => {
+                            const [newSort, newOrder] = e.target.value.split('-');
+                            setSortBy(newSort);
+                            setOrder(newOrder);
+                            setPage(1);
+                        }}
+                        className="appearance-none bg-white border border-gray-200 text-gray-700 py-2 pl-4 pr-10 rounded-lg focus:outline-none focus:ring-1 focus:ring-black focus:border-black cursor-pointer text-sm font-medium"
+                    >
+                        <option value="createdAt-desc">Newest Arrivals</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="name-asc">Name: A to Z</option>
+                    </select>
+                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                </div>
                 {/* Mobile Filter Button */}
                 <button
                   onClick={() => setMobileFiltersOpen(true)}
@@ -169,7 +232,7 @@ export default function Products() {
                 </button>
 
                 <span className="text-sm  text-gray-500 font-medium whitespace-nowrap hidden sm:block">
-                  {searchedProducts.length} Results
+                  {products.length} Results
                 </span>
 
                 <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
@@ -206,7 +269,61 @@ export default function Products() {
                 <p className="text-sm text-gray-500 font-light tracking-wide animate-pulse">Loading collection...</p>
               </div>
             ) : (
-              <ProductGrid viewType={viewType} filters={filters} products={searchedProducts} />
+              <>
+                <ProductGrid viewType={viewType} filters={filters} products={products} />
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center gap-2 mt-12 mb-8 items-center">
+                    <button
+                      disabled={page === 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm text-gray-700"
+                    >
+                      Prev
+                    </button>
+
+                    {/* Logic to show range of pages with ellipses */}
+                    {(() => {
+                        let startPage = Math.max(1, page - 1);
+                        let endPage = Math.min(totalPages, startPage + 2);
+                        
+                        // Adjust if we are at the end to still show 3 items if possible
+                        if (endPage - startPage < 2) {
+                            startPage = Math.max(1, endPage - 2);
+                        }
+
+                        const pages = [];
+                        
+                        for (let i = startPage; i <= endPage; i++) {
+                            pages.push(
+                                <button
+                                    key={i}
+                                    onClick={() => setPage(i)}
+                                    className={`w-10 h-10 rounded-lg font-medium text-sm transition-colors flex items-center justify-center ${
+                                    page === i 
+                                        ? "bg-black text-white shadow-md transform scale-105" 
+                                        : "border hover:bg-gray-50 text-gray-700"
+                                    }`}
+                                >
+                                    {i}
+                                </button>
+                            );
+                        }
+
+                        return pages;
+                    })()}
+
+                    <button
+                      disabled={page === totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm text-gray-700"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -237,7 +354,7 @@ export default function Products() {
               </button>
             </div>
             <div className="p-6 pb-10">
-              <ProductFilters filters={filters} setFilters={setFilters} />
+              <ProductFilters filters={filters} setFilters={handleSetFilters} />
             </div>
           </div>
         </div>

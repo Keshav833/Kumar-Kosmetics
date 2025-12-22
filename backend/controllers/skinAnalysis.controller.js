@@ -313,6 +313,21 @@ const scoreProducts = (profile, products) => {
   });
 };
 
+// Helper: Fetch Candidate Products
+const fetchCandidates = async (profile) => {
+    return await Product.find({
+      $and: [
+        { 
+            $or: [
+                { skinType: { $in: [profile.skinType, "All"] } },
+                { skinType: { $size: 0 } }
+            ]
+        },
+        { allergyLabels: { $nin: profile.allergies } },
+      ],
+    });
+};
+
 export const evaluateProfile = async (req, res) => {
   try {
     const { answers, userId } = req.body;
@@ -336,30 +351,39 @@ export const evaluateProfile = async (req, res) => {
     };
 
     // 1. Fetch Candidate Products
-    const candidates = await Product.find({
-      $and: [
-        { 
-            $or: [
-                { skinType: { $in: [profile.skinType, "All"] } },
-                { skinType: { $size: 0 } }
-            ]
-        },
-        { allergyLabels: { $nin: profile.allergies } },
-      ],
-    });
+    const candidates = await fetchCandidates(profile);
 
     // 2. Score Products
     const scoredProducts = scoreProducts(profile, candidates);
 
     // 3. Sort and Filter
-    const recommendations = scoredProducts
-      .filter((p) => p.rawScore > 0) // Only positive matches
-      .sort((a, b) => b.rawScore - a.rawScore)
-      .slice(0, 6); // Top 6
+    // 3. Sort and Filter (Categorized)
+    const categories = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+    let finalRecommendations = [];
+    const seenIds = new Set();
+    
+    // Get top 3 for each category
+    categories.forEach(cat => {
+        const topForCat = scoredProducts
+            .filter(p => p.category && p.category.toLowerCase().includes(cat.toLowerCase()) && p.rawScore > 0)
+            .sort((a, b) => b.rawScore - a.rawScore)
+            .slice(0, 5);
+        
+        topForCat.forEach(p => {
+             // Use .id or ._id depending on object structure, strict comparison needs strings usually
+             const id = p._id.toString();
+             if(!seenIds.has(id)) {
+                finalRecommendations.push(p);
+                seenIds.add(id);
+             }
+        });
+    });
+
+    const recommendations = finalRecommendations;
 
     // 4. Generate Comprehensive Analysis Data
     const insights = generateInsights(profile);
-    const routine = generateRoutine(profile, recommendations);
+    const routine = generateRoutine(profile, scoredProducts); // Use ALL scored products for routine
     const avoid = generateAvoidList(profile);
     const ingredientHighlights = generateIngredientHighlights(profile);
     const timeline = generateTimeline(profile);
@@ -426,10 +450,34 @@ export const getProfile = async (req, res) => {
         }
 
         // Generate comprehensive analysis data dynamically
-        const scoredRecommendations = scoreProducts(profile, profile.recommendedProducts);
+        const candidates = await fetchCandidates(profile);
+        const scoredProducts = scoreProducts(profile, candidates);
+        
+        // Recalculate top recommendations categorized
+        const categories = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+        let finalRecommendations = [];
+        const seenIds = new Set();
+        
+        // Get top 5 for each category
+        categories.forEach(cat => {
+            const topForCat = scoredProducts
+                .filter(p => p.category && p.category.toLowerCase().includes(cat.toLowerCase()) && p.rawScore > 0)
+                .sort((a, b) => b.rawScore - a.rawScore)
+                .slice(0, 5);
+            
+            topForCat.forEach(p => {
+                 const id = p._id.toString();
+                 if(!seenIds.has(id)) {
+                    finalRecommendations.push(p);
+                    seenIds.add(id);
+                 }
+            });
+        });
+
+        const recommendations = finalRecommendations;
         
         const insights = generateInsights(profile);
-        const routine = generateRoutine(profile, scoredRecommendations);
+        const routine = generateRoutine(profile, scoredProducts); // Use ALL scored products
         const avoid = generateAvoidList(profile);
         const ingredientHighlights = generateIngredientHighlights(profile);
         const timeline = generateTimeline(profile);
@@ -437,7 +485,7 @@ export const getProfile = async (req, res) => {
 
         res.json({
             profile,
-            recommendations: scoredRecommendations,
+            recommendations, // Return fresh recommendations
             analysisResult: {
                 insights,
                 routine,

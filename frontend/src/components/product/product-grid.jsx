@@ -47,28 +47,8 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
     }
   }
 
-  const allProducts = products;
-
-  // Filter products based on active filters
-  const filteredProducts = allProducts.filter((product) => {
-    const productSkinTypes = product.skinType || [];
-    const productConcerns = product.skinConcerns || product.concerns || [];
-    const productPrice = product.price || 0;
-
-    if (filters.skinType.length > 0 && !filters.skinType.some((type) => productSkinTypes.includes(type))) {
-      return false
-    }
-    if (filters.category.length > 0 && !filters.category.includes(product.category)) {
-      return false
-    }
-    if (productPrice < filters.priceRange[0] || productPrice > filters.priceRange[1]) {
-      return false
-    }
-    if (filters.concern.length > 0 && !filters.concern.some((concern) => productConcerns.includes(concern))) {
-      return false
-    }
-    return true
-  })
+  // Products are now filtered on the server
+  const filteredProducts = products;
 
   if (filteredProducts.length === 0) {
     return (
@@ -92,7 +72,7 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
             <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
               <motion.div 
                 layoutId={`product-card-${product._id || product.id}`}
-                className="bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer h-full flex flex-col"
+                className="relative bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer h-full flex flex-col"
               >
                 {/* Image */}
                 <div className="relative h-48 bg-white overflow-hidden flex items-center justify-center p-4">

@@ -197,37 +197,89 @@ export default function RecommendedProducts({ analysis, onReset, isEmbedded = fa
 
         {/* 4. Products Grid */}
         <section>
-            <h2 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-blue-900 mb-6 flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5 text-primary" /> Top Recommendations
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recommendations.map((product) => (
-                    <Link key={product._id} to={`/products/${product._id}`}>
-                        <div className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
-                            <div className="relative h-48 bg-gray-50 p-4 flex items-center justify-center">
-                                <img
-                                    src={product.images?.[0] || "/placeholder.svg"}
-                                    alt={product.name}
-                                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                                />
-                            </div>
-                            <div className="p-4">
-                                <div className="text-xs text-muted-foreground mb-1">{product.category}</div>
-                                <h3 className="font-medium text-foreground mb-2 line-clamp-1">{product.name}</h3>
-                                <div className="flex items-center justify-between mt-3">
-                                    <span className="font-semibold">₹{product.price}</span>
-                                    <button
-                                        onClick={(e) => handleAddToCart(e, product)}
-                                        className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
-                                    >
-                                        <ShoppingBag className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
+            
+            {(() => {
+                // Group products by category
+                const groups = {};
+                const cats = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+                
+                recommendations.forEach(product => {
+                    // Fuzzy match product category to one of our main types
+                    // If product.description or category contains "Cleanser", put it in Cleanser group.
+                    const pCat = (product.category || "").toLowerCase();
+                    const mainCat = cats.find(c => pCat.includes(c.toLowerCase()));
+                    
+                    const groupKey = mainCat || product.category || "Other";
+                    
+                    if (!groups[groupKey]) groups[groupKey] = [];
+                    groups[groupKey].push(product);
+                });
+
+                // Get categories present in groups, sorting by our preferred order if found
+                const presentCats = Object.keys(groups).sort((a, b) => {
+                    const idxA = cats.findIndex(c => a.toLowerCase().includes(c.toLowerCase()));
+                    const idxB = cats.findIndex(c => b.toLowerCase().includes(c.toLowerCase()));
+                    // If both known, sort by index. If one unknown, put at end.
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                    return a.localeCompare(b);
+                });
+
+                return presentCats.map(category => (
+                    <div key={category} className="mb-10">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4 px-1">{category}</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {groups[category].map((product) => (
+                                <Link key={product._id} to={`/products/${product._id}`}>
+                                    <div className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+                                        <div className="relative h-48 bg-gray-50 p-4 flex items-center justify-center">
+                                            {/* Match Badge */}
+                                            {product.matchScore && (
+                                                <div className="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
+                                                    <Sparkles className="w-3 h-3" />
+                                                    {product.matchScore}% Match
+                                                </div>
+                                            )}
+                                            <img
+                                                src={product.images?.[0] || "/placeholder.svg"}
+                                                alt={product.name}
+                                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        </div>
+                                        <div className="p-4">
+                                            <div className="text-xs text-muted-foreground mb-1">{product.category}</div>
+                                            <h3 className="font-medium text-foreground mb-1 line-clamp-1">{product.name}</h3>
+                                            
+                                            {/* Benefits / Reasons */}
+                                            {product.matchReasons && product.matchReasons.length > 0 && (
+                                                <div className="mb-3">
+                                                    <p className="text-[10px] text-indigo-600 font-medium bg-indigo-50 inline-block px-1.5 py-0.5 rounded">
+                                                        {product.matchReasons[0]}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center justify-between mt-auto">
+                                                <span className="font-semibold">₹{product.price}</span>
+                                                <button
+                                                    onClick={(e) => handleAddToCart(e, product)}
+                                                    className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+                                                >
+                                                    <ShoppingBag className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
                         </div>
-                    </Link>
-                ))}
-            </div>
+                    </div>
+                ));
+            })()}
         </section>
 
         {/* 5. Retake Quiz Button */}

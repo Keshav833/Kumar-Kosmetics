@@ -57,12 +57,10 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
     // Skin Recommendation Fields
-    skinType: [
-      {
-        type: String,
-        enum: ["Oily", "Dry", "Combination", "Sensitive", "Normal"],
-      },
-    ],
+    skinType: {
+      type: [String],
+      enum: ["Oily", "Dry", "Combination", "Sensitive", "Normal"],
+    },
     skinConcerns: {
       type: [String],
       enum: [
@@ -124,6 +122,15 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Add indexes for performance
+productSchema.index({ name: 'text' });
+productSchema.index({ category: 1 });
+productSchema.index({ skinType: 1 });
+productSchema.index({ skinConcerns: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ stock: 1 });
+productSchema.index({ createdAt: -1 });
 
 const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
 

@@ -16,6 +16,14 @@ export default function Admin() {
   const location = useLocation()
   const [currentSection, setCurrentSection] = useState("overview")
   const [products, setProducts] = useState([])
+  const [productsPage, setProductsPage] = useState(1);
+  const [productsTotalPages, setProductsTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  
+  // Search and Sort State
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [order, setOrder] = useState("desc");
   
   useEffect(() => {
     if (location.state?.section) {
@@ -26,15 +34,27 @@ export default function Admin() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axiosInstance.get("/products");
+        const res = await axiosInstance.get(`/products`, {
+          params: {
+            page: productsPage,
+            limit: 20,
+            search,
+            sortBy,
+            order
+          }
+        });
         setProducts(res.data.products);
+        setProductsTotalPages(res.data.totalPages);
+        setTotalProducts(res.data.totalProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
         toast.error("Failed to fetch products");
       }
     };
-    fetchProducts();
-  }, []);
+    if (currentSection === "products" || currentSection === "overview") {
+      fetchProducts();
+    }
+  }, [productsPage, currentSection, search, sortBy, order]);
 
   const [orders, setOrders] = useState([])
 
@@ -94,8 +114,23 @@ export default function Admin() {
       <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 rounded-l-2xl shadow-2xl my-2 mr-2">
         
         <main className="flex-1 overflow-y-auto">
-          {currentSection === "overview" && <DashboardOverview products={products} orders={orders} customers={customers} />}
-          {currentSection === "products" && <ProductsManager products={products} setProducts={setProducts} />}
+          {currentSection === "overview" && <DashboardOverview products={products} orders={orders} customers={customers} totalProductsCount={totalProducts} />}
+          {currentSection === "products" && (
+            <ProductsManager 
+              products={products} 
+              setProducts={setProducts} 
+              page={productsPage}
+              setPage={setProductsPage}
+              totalPages={productsTotalPages}
+              totalProducts={totalProducts}
+              search={search}
+              setSearch={setSearch}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              order={order}
+              setOrder={setOrder}
+            />
+          )}
           {currentSection === "orders" && <OrdersSection orders={orders} setOrders={setOrders} returns={returns} />}
           {currentSection === "categories" && <CategoriesSection />}
           {currentSection === "customers" && <CustomersSection customers={customers} />}

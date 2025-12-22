@@ -20,8 +20,13 @@ export default function ProductFilters({ filters, setFilters }) {
   }
 
   const skinTypes = ['Oily', 'Dry', 'Combination', 'Sensitive', 'Normal']
-  const categories = ['Skincare', 'Cosmetics', 'Masks', 'Serums', 'Creams']
-  const concerns = ['Acne', 'Pigmentation', 'Dullness', 'Wrinkles', 'Dark Circles', 'Dryness']
+  const categories = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "Toner", "Treatment"]
+  const concerns = [
+    "Acne", "Breakouts", "Blackheads", "Large pores", "Uneven texture", 
+    "Pigmentation", "Dark spots", "Uneven tone", "Dullness", "Fine lines", 
+    "Wrinkles", "Loss of firmness", "Dryness", "Flakiness", "Redness", 
+    "Rosacea", "Sensitivity", "Dark circles", "Puffiness"
+  ]
 
   const handleFilterChange = (key, value) => {
     setFilters({

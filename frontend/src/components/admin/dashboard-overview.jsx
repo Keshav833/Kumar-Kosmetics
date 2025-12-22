@@ -30,7 +30,7 @@ import {
 } from "recharts"
 import { format, subDays, isAfter, parseISO, isToday } from "date-fns"
 
-export default function DashboardOverview({ products = [], orders = [], customers = [] }) {
+export default function DashboardOverview({ products = [], orders = [], customers = [], totalProductsCount }) {
   const [dateRange, setDateRange] = useState("7d")
 
   // --- Calculations ---
@@ -42,7 +42,7 @@ export default function DashboardOverview({ products = [], orders = [], customer
 
     const totalOrders = orders.length
     const totalCustomers = customers.length
-    const totalProducts = products.length
+    const totalProducts = totalProductsCount ?? products.length
     const aov = totalOrders > 0 ? displayRevenue / totalOrders : 0
 
     return [
