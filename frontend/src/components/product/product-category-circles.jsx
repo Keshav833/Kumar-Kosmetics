@@ -24,6 +24,10 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
 
   return (
     <div className="w-full mb-10 overflow-hidden relative group">
+      {/* Gradient Fades */}
+      <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-gray-50 via-white/40 to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-gray-50 via-white/40 to-transparent z-10 pointer-events-none" />
+
       <LogoLoop
         logos={categories}
         speed={90} // Adjust speed as needed
@@ -44,13 +48,13 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
           return (
             <Component
               onClick={() => handleCategoryClick(cat.name)}
-              className="flex flex-col items-center gap-3 m-2 group/btn focus:outline-none cursor-pointer"
+              className="flex flex-col items-center gap-3 group/btn focus:outline-none cursor-pointer"
               role="button"
               tabIndex={isDuplicate ? -1 : 0}
             >
               <div 
                 className={`
-                  relative w-20 h-20 md:w-32 md:h-32 rounded-full p-1  transition-all duration-300
+                  relative w-20 h-20 md:w-32 md:h-32 rounded-full p-1 transition-all duration-300
                   ${isSelected ? "ring-2 ring-primary ring-offset-2" : "ring-1 ring-transparent hover:ring-2 hover:ring-gray-200 hover:ring-offset-2"}
                 `}
               >
