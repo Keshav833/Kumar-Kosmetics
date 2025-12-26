@@ -4,7 +4,7 @@ import User from "../models/Users.model.js";
 import bcrypt from "bcryptjs";
 import { OAuth2Client } from "google-auth-library";
 import OTP from "../models/otp.model.js";
-import { sendEmail } from "../utils/emailSender.js";
+import { sendPasswordResetEmail } from "../lib/email.service.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -195,7 +195,7 @@ export const forgotPassword = async (req, res) => {
         await OTP.create({ email, otp: hashedOtp });
 
         // Send Email
-        await sendEmail(email, "Password Reset OTP", `Your OTP for password reset is: ${otp}. It expires in 5 minutes.`);
+        await sendPasswordResetEmail(email, otp);
 
         res.json({ message: "OTP sent to your email" });
     } catch (error) {

@@ -54,11 +54,11 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
             >
               <div 
                 className={`
-                  relative w-20 h-20 md:w-32 md:h-32 rounded-full p-1 transition-all duration-300
+                  relative w-20 my-10 h-20 md:w-32 md:h-32 rounded-full p-1 transition-all duration-300
                   ${isSelected ? "ring-2 ring-primary ring-offset-2" : "ring-1 ring-transparent hover:ring-2 hover:ring-gray-200 hover:ring-offset-2"}
                 `}
               >
-                <div className="w-full h-full rounded-full overflow-hidden bg-white shadow-sm">
+                <div className="w-full h-full  rounded-full overflow-hidden bg-white shadow-sm">
                   <img 
                     src={cat.image} 
                     alt={cat.name} 

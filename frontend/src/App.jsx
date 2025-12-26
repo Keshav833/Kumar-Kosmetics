@@ -60,7 +60,7 @@ function AnimatedRoutes() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/order/:id/return" element={authUser ? <ReturnOrderPage /> : <Navigate to="/login" />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/order/success/:id" element={<OrderSuccess />} />
       </Routes>
     </AnimatePresence>
   );

@@ -1,5 +1,6 @@
 import Order from "../models/Order.model.js";
 import Product from "../models/product.model.js";
+import { sendOrderConfirmationEmail } from "../lib/email.service.js";
 
 export const createOrder = async (req, res) => {
 	try {
@@ -37,6 +38,16 @@ export const createOrder = async (req, res) => {
                  $inc: { stock: -item.quantity } 
              });
         }
+
+        // Send confirmation email asynchronously (don't await to avoid delaying response)
+        // Send confirmation email asynchronously (don't await to avoid delaying response)
+        /*
+        try {
+            await sendOrderConfirmationEmail(savedOrder, req.user);
+        } catch(emailErr) {
+            console.error("Email sending failed:", emailErr);
+        }
+        */
 
 		res.status(201).json(savedOrder);
 	} catch (error) {

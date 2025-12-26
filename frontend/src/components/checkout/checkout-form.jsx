@@ -1,16 +1,22 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-export default function CheckoutForm({ onSubmit }) {
+export default function CheckoutForm({ onSubmit, initialData }) {
   const [formData, setFormData] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    phone: '',
+    email: initialData?.email || '',
+    firstName: initialData?.firstName || '',
+    lastName: initialData?.lastName || '',
+    address: initialData?.address || '',
+    city: initialData?.city || '',
+    state: initialData?.state || '',
+    pincode: initialData?.pincode || '',
+    phone: initialData?.phone || '',
   })
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({ ...prev, ...initialData }));
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -37,7 +43,8 @@ export default function CheckoutForm({ onSubmit }) {
           value={formData.email}
           onChange={handleChange}
           required
-          className="w-full px-4 py-3 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-4"
+          readOnly
+          className="w-full px-4 py-3 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-4 bg-gray-100 cursor-not-allowed opacity-75"
         />
         <input
           type="tel"

@@ -152,8 +152,8 @@ export default function Profile() {
                                           Cancel Order
                                       </button>
                                   )}
-                                  <button className="px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100">
-                                      View Details
+                                  <button onClick={() => window.location.href = `/order/success/${order._id}`} className="px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100">
+                                      View Receipt
                                   </button>
                                   {order.status === 'Delivered' && (
                                       <button 

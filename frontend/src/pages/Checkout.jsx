@@ -5,13 +5,14 @@ import Footer from "@/components/layout/footer";
 import CheckoutForm from "@/components/checkout/checkout-form";
 import OrderReview from "@/components/cart/order-review";
 import { useCartStore } from "@/store/useCartStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import axiosInstance from "@/lib/axios";
 import { toast } from "react-hot-toast";
 
 export default function Checkout() {
-	const [step, setStep] = useState(1);
+    const { authUser } = useAuthStore();
 	const [orderData, setOrderData] = useState({
-		email: "",
+		email: authUser?.email || "",
 		firstName: "",
 		lastName: "",
 		address: "",
@@ -27,10 +28,39 @@ export default function Checkout() {
     const [couponCode, setCouponCode] = useState(location.state?.couponCode || "");
     const [isCouponApplied, setIsCouponApplied] = useState(location.state?.isCouponApplied || false);
     const [discount, setDiscount] = useState(location.state?.discount || 0);
+    const [step, setStep] = useState(1);
 
 	useEffect(() => {
 		getCart();
 	}, [getCart]);
+
+    useEffect(() => {
+        if (authUser) {
+            let prefillData = { email: authUser.email };
+            
+            if (authUser.addresses && authUser.addresses.length > 0) {
+                const latestAddress = authUser.addresses[authUser.addresses.length - 1];
+                
+                // Split fullName into firstName and lastName
+                const names = latestAddress.fullName ? latestAddress.fullName.split(" ") : [];
+                const firstName = names[0] || "";
+                const lastName = names.slice(1).join(" ") || "";
+
+                prefillData = {
+                    ...prefillData,
+                    firstName: firstName,
+                    lastName: lastName,
+                    address: latestAddress.address || "",
+                    city: latestAddress.city || "",
+                    state: latestAddress.state || "",
+                    pincode: latestAddress.pincode || "",
+                    phone: latestAddress.phone || authUser.phone || "",
+                };
+            }
+
+            setOrderData(prev => ({ ...prev, ...prefillData }));
+        }
+    }, [authUser]);
 
 	const cartItems = cart?.items?.map(item => ({
         ...item,
@@ -94,7 +124,7 @@ export default function Checkout() {
 			if (res.data.success) {
 				toast.success("Payment Successful!");
 				clearCart();
-				navigate("/order-success");
+				navigate(`/order/success/${orderId}`);
 			} else {
 				toast.error("Payment Verification Failed");
 			}
@@ -210,7 +240,7 @@ function PaymentForm({ orderData, total, cartItems, onSuccess, onBack, couponCod
                 if(orderRes.status === 201) {
                     toast.success("Order Placed Successfully!");
                     clearCart();
-                    navigate("/order-success");
+                    navigate(`/order/success/${orderRes.data._id}`);
                 }
             } else {
                 // Online Payment Flow
@@ -229,7 +259,7 @@ function PaymentForm({ orderData, total, cartItems, onSuccess, onBack, couponCod
                     currency: "INR",
                     name: "Kumar Kosmetics",
                     description: "Payment for your order",
-                    image: "/KKLogo.png", // Ensure this path is correct
+                    image: "https://cdn.razorpay.com/logos/GhRQcyean79PqE_medium.png", // Use a valid secure URL or your actual uploaded logo unique 
                     order_id: order.id,
                     callback_url: "http://localhost:5000/api/payment/verify-payment", // Fallback if handler fails, but we use handler
                     handler: async function (response) {
